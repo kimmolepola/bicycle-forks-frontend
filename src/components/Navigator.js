@@ -10,6 +10,7 @@ import {
   ListItemText,
 } from '@material-ui/core';
 import {
+  DirectionsBike as DirectionsBikeIcon,
   Home as HomeIcon,
   People as PeopleIcon,
   DnsRounded as DnsRoundedIcon,
@@ -24,6 +25,11 @@ import {
 import Theme from '../Theme';
 
 const categories = [
+  {
+    id: 'Content',
+    children: [
+      { id: 'Forks', icon: <DirectionsBikeIcon />, active: true }],
+  },
   {
     id: 'Develop',
     children: [
@@ -93,7 +99,7 @@ const Navigator = ({ ...other }) => {
     <Drawer variant="permanent" {...other}>
       <List disablePadding>
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
-          Paperbase
+          Fork database
         </ListItem>
         <ListItem className={clsx(classes.item, classes.itemCategory)}>
           <ListItemIcon className={classes.itemIcon}>

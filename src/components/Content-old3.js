@@ -1,73 +1,45 @@
 import React from 'react';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableSortLabel,
-  Toolbar,
-  Typography,
-  Paper,
-  Checkbox,
-  IconButton,
-  Tooltip,
-  FormControlLabel,
-  Switch,
-} from '@material-ui/core';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
+import Checkbox from '@material-ui/core/Checkbox';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import { useQuery, gql } from '@apollo/client';
 
-const HELLO = gql`
-  query{hello}
-`;
-
-function ExchangeRates() {
-  const { loading, error, data } = useQuery(HELLO);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
-
-  return (<div>{data.hello}</div>);
-}
-
-function createData(
-  id,
-  brand,
-  model,
-  tapered,
-  diameter,
-  threaded,
-  rake,
-  axletocrown,
-  brake,
-  blade,
-  steerer,
-) {
+function createData(name, calories, fat, carbs, protein) {
   return {
-    id, brand, model, tapered, diameter, threaded, rake, axletocrown, brake, blade, steerer,
+    name, calories, fat, carbs, protein,
   };
 }
 
 const rows = [
-  createData('Cupcake', 305, 3.7, 67, 4.3, 1, 1, 1, 1, 1, 1),
-  createData('Donut', 452, 25.0, 51, 4.9, 1, 1, 1, 1, 1, 1),
-  createData('Eclair', 262, 16.0, 24, 6.0, 1, 1, 1, 1, 1, 1),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0, 1, 1, 1, 1, 1, 1),
-  createData('Gingerbread', 356, 16.0, 49, 3.9, 1, 1, 1, 1, 1, 1),
-  createData('Honeycomb', 408, 3.2, 87, 6.5, 1, 1, 1, 1, 1, 1),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3, 1, 1, 1, 1, 1, 1),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0, 1, 1, 1, 1, 1, 1),
-  createData('KitKat', 518, 26.0, 65, 7.0, 1, 1, 1, 1, 1, 1),
-  createData('Lollipop', 392, 0.2, 98, 0.0, 1, 1, 1, 1, 1, 1),
-  createData('Marshmallow', 318, 0, 81, 2.0, 1, 1, 1, 1, 1, 1),
-  createData('Nougat', 360, 19.0, 9, 37.0, 1, 1, 1, 1, 1, 1),
-  createData('Oreo', 437, 18.0, 63, 4.0, 1, 1, 1, 1, 1, 1),
+  createData('Cupcake', 305, 3.7, 67, 4.3),
+  createData('Donut', 452, 25.0, 51, 4.9),
+  createData('Eclair', 262, 16.0, 24, 6.0),
+  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+  createData('Gingerbread', 356, 16.0, 49, 3.9),
+  createData('Honeycomb', 408, 3.2, 87, 6.5),
+  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+  createData('Jelly Bean', 375, 0.0, 94, 0.0),
+  createData('KitKat', 518, 26.0, 65, 7.0),
+  createData('Lollipop', 392, 0.2, 98, 0.0),
+  createData('Marshmallow', 318, 0, 81, 2.0),
+  createData('Nougat', 360, 19.0, 9, 37.0),
+  createData('Oreo', 437, 18.0, 63, 4.0),
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -98,36 +70,20 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'brand', numeric: false, disablePadding: true, label: 'Brand',
+    id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)',
   },
   {
-    id: 'model', numeric: false, disablePadding: false, label: 'Model',
+    id: 'calories', numeric: true, disablePadding: false, label: 'Calories',
   },
   {
-    id: 'tapered', numeric: true, disablePadding: false, label: 'Tapered',
+    id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)',
   },
   {
-    id: 'diameter', numeric: true, disablePadding: false, label: 'Steerer Tube Diameter (inches)',
+    id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)',
   },
   {
-    id: 'threaded', numeric: false, disablePadding: false, label: 'Threaded',
+    id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)',
   },
-  {
-    id: 'rake', numeric: true, disablePadding: false, label: 'Rake/Offset (mm)',
-  },
-  {
-    id: 'axletocrown', numeric: true, disablePadding: false, label: 'Axle-to-Crown (A-C) (mm)',
-  },
-  {
-    id: 'brake', numeric: false, disablePadding: false, label: 'Brake system',
-  },
-  {
-    id: 'blade', numeric: false, disablePadding: false, label: 'Blade material',
-  },
-  {
-    id: 'steerer', numeric: false, disablePadding: false, label: 'Steerer tube material',
-  },
-
 ];
 
 function EnhancedTableHead(props) {
@@ -146,7 +102,7 @@ function EnhancedTableHead(props) {
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all forks' }}
+            inputProps={{ 'aria-label': 'select all desserts' }}
           />
         </TableCell>
         {headCells.map((headCell) => (
@@ -211,7 +167,7 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Forks
+          Nutrition
         </Typography>
       )}
 
@@ -259,7 +215,7 @@ const useStyles = makeStyles((theme) => ({
 export default function EnhancedTable() {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('brand');
+  const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
@@ -273,19 +229,19 @@ export default function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = rows.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
+  const handleClick = (event, name) => {
+    const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(selected, name);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -313,13 +269,12 @@ export default function EnhancedTable() {
     setDense(event.target.checked);
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return (
     <div className={classes.root}>
-      <ExchangeRates />
       <Paper className={classes.paper}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -342,17 +297,17 @@ export default function EnhancedTable() {
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                  const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row.name)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={row.name}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
@@ -362,17 +317,12 @@ export default function EnhancedTable() {
                         />
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.brand}
+                        {row.name}
                       </TableCell>
-                      <TableCell align="right">{row.model}</TableCell>
-                      <TableCell align="right">{row.tapered}</TableCell>
-                      <TableCell align="right">{row.diameter}</TableCell>
-                      <TableCell align="right">{row.threaded}</TableCell>
-                      <TableCell align="right">{row.rake}</TableCell>
-                      <TableCell align="right">{row.axletocrown}</TableCell>
-                      <TableCell align="right">{row.brake}</TableCell>
-                      <TableCell align="right">{row.blade}</TableCell>
-                      <TableCell align="right">{row.steerer}</TableCell>
+                      <TableCell align="right">{row.calories}</TableCell>
+                      <TableCell align="right">{row.fat}</TableCell>
+                      <TableCell align="right">{row.carbs}</TableCell>
+                      <TableCell align="right">{row.protein}</TableCell>
                     </TableRow>
                   );
                 })}
