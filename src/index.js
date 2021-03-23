@@ -8,7 +8,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const client = new ApolloClient({
-  uri: 'https://kimmolepola-bicycle-forks-backend.azurewebsites.net/graphql',
+  // uri: 'https://kimmolepola-bicycle-forks-backend.azurewebsites.net/graphql',
+  uri: 'http://localhost:7071/graphql',
   cache: new InMemoryCache(),
 });
 

@@ -37,6 +37,7 @@ module.exports = {
     'react/jsx-one-expression-per-line': 'off',
     'react/prop-types': 0,
     'react/jsx-props-no-spreading': 'off',
+    'no-nested-ternary': 'off',
   },
   parser: 'babel-eslint',
 };
