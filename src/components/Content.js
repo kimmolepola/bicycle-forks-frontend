@@ -129,17 +129,22 @@ const EnhancedTableHead = ({
     onRequestSort(event, property);
   };
 
-  const headCells = headers.map((header) => ({
-    id: header.id,
-    numeric: header.type === 'numeric',
-    disablePadding: header.id === 'brand',
-    label: header.name,
-  }));
+  const headCells = [];
+
+  headers.forEach((header) => {
+    if (header.id !== 'id') {
+      headCells.push({
+        id: header.id,
+        numeric: header.type === 'numeric',
+        label: header.name,
+      });
+    }
+  });
 
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
+        <TableCell padding="checkbox" style={{ verticalAlign: 'bottom', paddingBottom: Theme.spacing(1) }}>
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
@@ -151,8 +156,8 @@ const EnhancedTableHead = ({
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
+            style={headCell.id === 'brand' ? { verticalAlign: 'bottom', paddingLeft: 0 } : { verticalAlign: 'bottom' }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -386,10 +391,10 @@ const EnhancedTable = () => {
                               inputProps={{ 'aria-labelledby': labelId }}
                             />
                           </TableCell>
-                          <TableCell component="td" id={labelId} scope="row" padding="none">
+                          <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row" padding="none">
                             {row.brand}
                           </TableCell>
-                          <TableCell component="td" id={labelId} scope="row" padding="none">
+                          <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row">
                             {row.model}
                           </TableCell>
                           {Object.keys(row).map((key) => {
@@ -398,7 +403,7 @@ const EnhancedTable = () => {
                             }
                             const header = headers.find((hdr) => hdr.id === key);
                             const align = header ? header.type === 'numeric' ? 'right' : 'left' : 'left';
-                            return (<TableCell key={key.concat(index)} component="td" id={labelId} scope="row" padding="none" align={align}>{row[key]}</TableCell>);
+                            return (<TableCell key={key.concat(index)} component="td" id={labelId} scope="row" align={align}>{row[key]}</TableCell>);
                           })}
                         </TableRow>
                       );
