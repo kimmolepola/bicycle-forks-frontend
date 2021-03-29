@@ -3,11 +3,13 @@ työaikakirjanpito
 frontend: https://github.com/kimmolepola/bicycle-forks-frontend
 backend: https://github.com/kimmolepola/bicycle-forks-backend
 
-päivä	aika	mitä tein
-22.3.	4	frontend: eslint setup, initial structure, ui theme
+päivä		aika	mitä tein
+22.3.		4	frontend: eslint setup, initial structure, ui theme
 		1	backend: azure functions graphql initial setup
 		1	frontend: graphql initial query
-23.3.	3:30	backend: prepare data, data to object array, graphql query
+23.3.		3:30	backend: prepare data, data to object array, graphql query
 		1:30	frontend, backend: query
 		3	frontend: UI table
-24.3	2	frontend: table
+24.3.		2	frontend: table
+26.3.		1	read about Mapbox
+28.3.

@@ -82,7 +82,7 @@ const Header = ({ onDrawerToggle }) => {
           <Grid container alignItems="center" spacing={1}>
             <Grid item xs>
               <Typography color="inherit" variant="h5" component="h1">
-                Authentication
+                Forks
               </Typography>
             </Grid>
             <Grid item>
@@ -108,10 +108,9 @@ const Header = ({ onDrawerToggle }) => {
         elevation={0}
       >
         <Tabs value={0} textColor="inherit">
-          <Tab textColor="inherit" label="Users" />
-          <Tab textColor="inherit" label="Sign-in method" />
-          <Tab textColor="inherit" label="Templates" />
-          <Tab textColor="inherit" label="Usage" />
+          <Tab textColor="inherit" label="Table" />
+          <Tab textColor="inherit" label="Search" />
+          <Tab textColor="inherit" label="Add" />
         </Tabs>
       </AppBar>
     </>

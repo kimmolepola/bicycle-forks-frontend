@@ -18,50 +18,20 @@ import {
   Tooltip,
   FormControlLabel,
   Switch,
+  Collapse,
 } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
+import {
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+  Delete as DeleteIcon,
+  FilterList as FilterListIcon,
+} from '@material-ui/icons';
 import { useQuery, gql } from '@apollo/client';
 import Theme from '../Theme';
 
 const FORK_LIST_HEADERS = gql`query{forkListHeaders}`;
 
 const ALL_FORKS = gql`query{allForks}`;
-/*
-function createData(
-  id,
-  brand,
-  model,
-  tapered,
-  diameter,
-  threaded,
-  rake,
-  axletocrown,
-  brake,
-  blade,
-  steerer,
-) {
-  return {
-    id, brand, model, tapered, diameter, threaded, rake, axletocrown, brake, blade, steerer,
-  };
-}
-
-const rows2 = [
-  createData('Cupcake', 305, 3.7, 67, 4.3, 1, 1, 1, 1, 1, 1),
-  createData('Donut', 452, 25.0, 51, 4.9, 1, 1, 1, 1, 1, 1),
-  createData('Eclair', 262, 16.0, 24, 6.0, 1, 1, 1, 1, 1, 1),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0, 1, 1, 1, 1, 1, 1),
-  createData('Gingerbread', 356, 16.0, 49, 3.9, 1, 1, 1, 1, 1, 1),
-  createData('Honeycomb', 408, 3.2, 87, 6.5, 1, 1, 1, 1, 1, 1),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3, 1, 1, 1, 1, 1, 1),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0, 1, 1, 1, 1, 1, 1),
-  createData('KitKat', 518, 26.0, 65, 7.0, 1, 1, 1, 1, 1, 1),
-  createData('Lollipop', 392, 0.2, 98, 0.0, 1, 1, 1, 1, 1, 1),
-  createData('Marshmallow', 318, 0, 81, 2.0, 1, 1, 1, 1, 1, 1),
-  createData('Nougat', 360, 19.0, 9, 37.0, 1, 1, 1, 1, 1, 1),
-  createData('Oreo', 437, 18.0, 63, 4.0, 1, 1, 1, 1, 1, 1),
-];
-*/
 
 const descendingComparator = (a, b, orderBy) => {
   if (b[orderBy] < a[orderBy]) {
@@ -87,40 +57,63 @@ const stableSort = (array, comparator) => {
   return stabilizedThis.map((el) => el[0]);
 };
 
-/*
-const headCells = [
-  {
-    id: 'brand', numeric: false, disablePadding: true, label: 'Brand',
+const useRowStyles = makeStyles({
+  root: {
+    '& > *': {
+      borderBottom: 'unset',
+    },
   },
-  {
-    id: 'model', numeric: false, disablePadding: false, label: 'Model',
-  },
-  {
-    id: 'tapered', numeric: true, disablePadding: false, label: 'Tapered',
-  },
-  {
-    id: 'diameter', numeric: true, disablePadding: false, label: 'Steerer Tube Diameter (inches)',
-  },
-  {
-    id: 'threaded', numeric: false, disablePadding: false, label: 'Threaded',
-  },
-  {
-    id: 'rake', numeric: true, disablePadding: false, label: 'Rake/Offset (mm)',
-  },
-  {
-    id: 'axletocrown', numeric: true, disablePadding: false, label: 'Axle-to-Crown (A-C) (mm)',
-  },
-  {
-    id: 'brake', numeric: false, disablePadding: false, label: 'Brake Mount',
-  },
-  {
-    id: 'blade', numeric: false, disablePadding: false, label: 'Blade Material',
-  },
-  {
-    id: 'steerer', numeric: false, disablePadding: false, label: 'Steerer Tube Material',
-  },
-];
-*/
+});
+
+const Row = ({
+  row, index, handleClick, headers, isItemSelected, labelId,
+}) => {
+  const [open, setOpen] = React.useState(false);
+  const classes = useRowStyles();
+
+  return (
+    <React.Fragment key={row.id.concat(index)}>
+      <TableRow
+        hover
+        onClick={(event) => handleClick(event, row.id)}
+        role="checkbox"
+        aria-checked={isItemSelected}
+        tabIndex={-1}
+        selected={isItemSelected}
+        className={classes.root}
+      >
+        <TableCell padding="checkbox">
+          <Checkbox
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': labelId }}
+          />
+        </TableCell>
+        <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
+        <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row" padding="none">
+          {row.brand}
+        </TableCell>
+        <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row">
+          {row.model}
+        </TableCell>
+        {Object.keys(row).map((key) => {
+          if (key === 'brand' || key === 'id' || key === 'model') {
+            return null;
+          }
+          const header = headers.find((hdr) => hdr.id === key);
+          const align = header ? header.type === 'numeric' ? 'right' : 'left' : 'left';
+          return (<TableCell key={key.concat(index)} component="td" id={labelId} scope="row" align={align}>{row[key]}</TableCell>);
+        })}
+      </TableRow>
+      <TableRow>
+        <TableCell colSpan={6}>
+          <Collapse />
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
+  );
+};
 
 const EnhancedTableHead = ({
   headers, classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort,
@@ -376,36 +369,15 @@ const EnhancedTable = () => {
                       const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
                       return (
-                        <TableRow
-                          hover
-                          onClick={(event) => handleClick(event, row.id)}
-                          role="checkbox"
-                          aria-checked={isItemSelected}
-                          tabIndex={-1}
+                        <Row
                           key={row.id.concat(index)}
-                          selected={isItemSelected}
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox
-                              checked={isItemSelected}
-                              inputProps={{ 'aria-labelledby': labelId }}
-                            />
-                          </TableCell>
-                          <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row" padding="none">
-                            {row.brand}
-                          </TableCell>
-                          <TableCell style={{ whiteSpace: 'nowrap' }} component="td" id={labelId} scope="row">
-                            {row.model}
-                          </TableCell>
-                          {Object.keys(row).map((key) => {
-                            if (key === 'brand' || key === 'id' || key === 'model') {
-                              return null;
-                            }
-                            const header = headers.find((hdr) => hdr.id === key);
-                            const align = header ? header.type === 'numeric' ? 'right' : 'left' : 'left';
-                            return (<TableCell key={key.concat(index)} component="td" id={labelId} scope="row" align={align}>{row[key]}</TableCell>);
-                          })}
-                        </TableRow>
+                          row={row}
+                          index={index}
+                          handleClick={handleClick}
+                          headers={headers}
+                          isItemSelected={isItemSelected}
+                          labelId={labelId}
+                        />
                       );
                     })}
                   {emptyRows > 0 && (
