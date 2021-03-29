@@ -1,0 +1,84 @@
+import React, { useRef, useEffect, useState } from 'react';
+import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
+import { Box, Container, Paper } from '@material-ui/core';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+
+const useStyles = makeStyles({
+  mapContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  sidebar: {
+    backgroundColor: 'rgba(35, 55, 75, 0.9)',
+    color: '#ffffff',
+    padding: '6px 12px',
+    font: '15px/24px monospace',
+    zIndex: 1,
+    top: 0,
+    left: 0,
+    margin: '12px',
+    borderRadius: '4px',
+  },
+});
+
+const Map = () => {
+  const classes = useStyles();
+
+  const mapContainer = useRef();
+  const [lng, setLng] = useState(24.9454);
+  const [lat, setLat] = useState(60.1655);
+  const [zoom, setZoom] = useState(13.76);
+
+  useEffect(() => {
+    const map = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [lng, lat],
+      zoom,
+    });
+
+    map.on('move', () => {
+      setLng(map.getCenter().lng.toFixed(4));
+      setLat(map.getCenter().lat.toFixed(4));
+      setZoom(map.getZoom().toFixed(2));
+    });
+
+    map.on('load', () => {
+      map.resize();
+    });
+
+    return () => map.remove();
+  }, []);
+
+  mapboxgl.workerClass = MapboxWorker;
+  mapboxgl.accessToken = 'pk.eyJ1Ijoia2ltbW9sZXBvbGEiLCJhIjoiY2ttdWdsY2w3MTFrbTJvcDljcnc0dTdvbSJ9.Fqbb2Qe_1SRfNZrx4KaH7A';
+
+  return (
+    <div>
+      <div className={classes.sidebar}>
+        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+      </div>
+      <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
+    </div>
+  );
+};
+
+const Content = () => (
+  <Box style={{
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'yellow',
+  }}
+  >hello
+  </Box>
+);
+
+export default Content;

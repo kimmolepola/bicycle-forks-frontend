@@ -3,14 +3,15 @@ työaikakirjanpito
 frontend: https://github.com/kimmolepola/bikesafe-frontend
 backend: https://github.com/kimmolepola/bikesafe-backend
 
-päivä		aika	mitä tein
-22.3.		4	frontend: eslint setup, initial structure, ui theme
-		1	backend: azure functions graphql initial setup
-		1	frontend: graphql initial query
-23.3.		3:30	backend: prepare data, data to object array, graphql query
-		1:30	frontend, backend: query
-		3	frontend: UI table
-24.3.		2	frontend: table
-26.3.		1	read about Mapbox
-28.3.		1 	Mapbox tutorial
-29.3.
+päivä		aika	kumul.	mitä tein
+22.3.		4		4		frontend: eslint setup, initial structure, ui theme
+			1		5		backend: azure functions graphql initial setup
+			1		6		frontend: graphql initial query
+23.3.		3:30	9:30	backend: prepare data, data to object array, graphql query
+			1:30	11		frontend, backend: query
+			3		14		frontend: UI table
+24.3.		2		16		frontend: table
+26.3.		1		17		read about Mapbox
+28.3.		1 		18		Mapbox tutorial
+29.3.		1		19		Mapbox tutorial
+			5		24		Mapbox, CSS

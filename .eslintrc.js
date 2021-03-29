@@ -38,6 +38,7 @@ module.exports = {
     'react/prop-types': 0,
     'react/jsx-props-no-spreading': 'off',
     'no-nested-ternary': 'off',
+    'no-unused-vars': 'off',
   },
   parser: 'babel-eslint',
 };

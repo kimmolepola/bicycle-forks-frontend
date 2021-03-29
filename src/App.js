@@ -1,11 +1,10 @@
-import './App.css';
 import React from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
   CssBaseline, Hidden, Typography, Link,
 } from '@material-ui/core';
 import Navigator from './components/Navigator';
-import Content from './components/Content';
+import Content from './components/Map';
 import Header from './components/Header';
 import Theme from './Theme';
 
@@ -47,6 +46,9 @@ const useStyles = makeStyles({
     padding: Theme.spacing(2),
     background: '#eaeff1',
   },
+  header: {
+    flex: 1,
+  },
 });
 
 function App() {
@@ -74,7 +76,7 @@ function App() {
           </Hidden>
         </nav>
         <div className={classes.app}>
-          <Header onDrawerToggle={handleDrawerToggle} />
+          <Header className={classes.header} onDrawerToggle={handleDrawerToggle} />
           <main className={classes.main}>
             <Content />
           </main>
