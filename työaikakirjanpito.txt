@@ -1,7 +1,7 @@
 työaikakirjanpito
 
-frontend: https://github.com/kimmolepola/bicycle-forks-frontend
-backend: https://github.com/kimmolepola/bicycle-forks-backend
+frontend: https://github.com/kimmolepola/bikesafe-frontend
+backend: https://github.com/kimmolepola/bikesafe-backend
 
 päivä	aika	mitä tein
 22.3.	4	frontend: eslint setup, initial structure, ui theme
