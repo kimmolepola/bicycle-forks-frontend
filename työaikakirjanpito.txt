@@ -1,7 +1,7 @@
 työaikakirjanpito
 
-frontend: https://github.com/kimmolepola/bicycle-forks-frontend
-backend: https://github.com/kimmolepola/bicycle-forks-backend
+frontend: https://github.com/kimmolepola/bikesafe-frontend
+backend: https://github.com/kimmolepola/bikesafe-backend
 
 päivä		aika	mitä tein
 22.3.		4	frontend: eslint setup, initial structure, ui theme
@@ -12,4 +12,5 @@ päivä		aika	mitä tein
 		3	frontend: UI table
 24.3.		2	frontend: table
 26.3.		1	read about Mapbox
-28.3.
+28.3.		1 	Mapbox tutorial
+29.3.
