@@ -4,8 +4,14 @@ import { Box, Container, Paper } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
+import Theme from '../Theme';
 
 const useStyles = makeStyles({
+  container: {
+    flex: 1,
+    position: 'relative',
+    background: 'green',
+  },
   mapContainer: {
     position: 'absolute',
     top: 0,
@@ -14,6 +20,7 @@ const useStyles = makeStyles({
     right: 0,
   },
   sidebar: {
+    position: 'absolute',
     backgroundColor: 'rgba(35, 55, 75, 0.9)',
     color: '#ffffff',
     padding: '6px 12px',
@@ -37,7 +44,8 @@ const Map = () => {
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v11',
+      // style: 'mapbox://styles/mapbox/streets-v11',
+      style: 'mapbox://styles/kimmolepola/ckmxq3iyb123d17n26udep7h5',
       center: [lng, lat],
       zoom,
     });
@@ -48,10 +56,6 @@ const Map = () => {
       setZoom(map.getZoom().toFixed(2));
     });
 
-    map.on('load', () => {
-      map.resize();
-    });
-
     return () => map.remove();
   }, []);
 
@@ -59,26 +63,20 @@ const Map = () => {
   mapboxgl.accessToken = 'pk.eyJ1Ijoia2ltbW9sZXBvbGEiLCJhIjoiY2ttdWdsY2w3MTFrbTJvcDljcnc0dTdvbSJ9.Fqbb2Qe_1SRfNZrx4KaH7A';
 
   return (
-    <div>
+    <Box className={classes.container}>
       <div className={classes.sidebar}>
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
       </div>
       <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
-    </div>
+    </Box>
   );
 };
 
-const Content = () => (
-  <Box style={{
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'yellow',
-  }}
-  >hello
-  </Box>
-);
+const Cont = () => {
+  const classes = useStyles();
+  return (
+    <div className={classes.container}>hello</div>
+  );
+};
 
-export default Content;
+export default Map;

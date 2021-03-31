@@ -28,7 +28,7 @@ const categories = [
   {
     id: 'Content',
     children: [
-      { id: 'Forks', icon: <DirectionsBikeIcon />, active: true }],
+      { id: 'Bike Stands', icon: <DirectionsBikeIcon />, active: true }],
   },
   {
     id: 'Develop',
@@ -99,7 +99,7 @@ const Navigator = ({ ...other }) => {
     <Drawer variant="permanent" {...other}>
       <List disablePadding>
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
-          Fork database
+          Safebike
         </ListItem>
         <ListItem className={clsx(classes.item, classes.itemCategory)}>
           <ListItemIcon className={classes.itemIcon}>

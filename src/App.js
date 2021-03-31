@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline, Hidden, Typography, Link,
+  CssBaseline, Hidden, Typography, Link, Box,
 } from '@material-ui/core';
 import Navigator from './components/Navigator';
 import Content from './components/Map';
@@ -38,8 +38,12 @@ const useStyles = makeStyles({
     flexDirection: 'column',
   },
   main: {
+    display: 'flex',
     flex: 1,
-    padding: Theme.spacing(6, 4),
+    // padding: Theme.spacing(6, 4),
+    paddingTop: Theme.spacing(6),
+    paddingLeft: Theme.spacing(4),
+    paddingRight: Theme.spacing(4),
     background: '#eaeff1',
   },
   footer: {
