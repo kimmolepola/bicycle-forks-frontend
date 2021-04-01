@@ -50,6 +50,34 @@ const Map = () => {
       zoom,
     });
 
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on('mouseenter', 'places', () => {
+      console.log('mouse over');
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'places', () => {
+      map.getCanvas().style.cursor = '';
+    });
+
+    map.on('click', (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ['safebike-tileset'], // replace this with the name of the layer
+      });
+
+      if (!features.length) {
+        return;
+      }
+
+      const feature = features[0];
+
+      const popup = new mapboxgl.Popup({ offset: [0, -15] })
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(`<h3>${feature.properties.type}</h3>`)
+        .addTo(map);
+    });
+
     map.on('move', () => {
       setLng(map.getCenter().lng.toFixed(4));
       setLat(map.getCenter().lat.toFixed(4));
