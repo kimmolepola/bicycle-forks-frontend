@@ -20,13 +20,16 @@ const Search = ({ tab, map }) => {
   const classes = useStyles();
 
   useEffect(() => {
-    const ftrs = map.querySourceFeatures(
-      map.getLayer('safebike-tileset').source,
-      { sourceLayer: 'safebike-tileset' },
-    );
+    let ftrs;
+    if (map) {
+      ftrs = map.querySourceFeatures(
+        map.getLayer('safebike-tileset').source,
+        { sourceLayer: 'safebike-tileset' },
+      );
+    }
     console.log(ftrs);
     setFeatures(ftrs);
-  }, []);
+  }, [map]);
 
   const onSubmit = (e) => {
     e.preventDefault();
