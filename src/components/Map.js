@@ -1,9 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
-import { Box, Container, Paper } from '@material-ui/core';
+import {
+  Box, Container, Paper, Button, Link,
+} from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
+import ReactDOM from 'react-dom';
 import Theme from '../Theme';
 
 const useStyles = makeStyles({
@@ -33,14 +36,9 @@ const useStyles = makeStyles({
   },
 });
 
-const Map = () => {
-  const classes = useStyles();
-
-  const mapContainer = useRef();
-  const [lng, setLng] = useState(24.9454);
-  const [lat, setLat] = useState(60.1655);
-  const [zoom, setZoom] = useState(13.76);
-
+const setupMap = ({
+  setMap, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+}) => {
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
@@ -50,14 +48,15 @@ const Map = () => {
       zoom,
     });
 
+    setMap(map);
+
     // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'places', () => {
-      console.log('mouse over');
+    map.on('mouseenter', 'safebike-tileset', () => {
       map.getCanvas().style.cursor = 'pointer';
     });
 
     // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'places', () => {
+    map.on('mouseleave', 'safebike-tileset', () => {
       map.getCanvas().style.cursor = '';
     });
 
@@ -72,9 +71,13 @@ const Map = () => {
 
       const feature = features[0];
 
+      const content = document.createElement('div');
+      ReactDOM.render(<Button onClick={(x) => console.log('click: ', feature)}>click</Button>, content);
+
       const popup = new mapboxgl.Popup({ offset: [0, -15] })
         .setLngLat(feature.geometry.coordinates)
-        .setHTML(`<h3>${feature.properties.type}</h3>`)
+        // .setHTML(`<h3>${feature.properties.type}</h3>`)
+        .setDOMContent(content)
         .addTo(map);
     });
 
@@ -84,26 +87,38 @@ const Map = () => {
       setZoom(map.getZoom().toFixed(2));
     });
 
-    return () => map.remove();
+    return () => {
+      map.remove();
+      setMap(null);
+    };
   }, []);
+};
+
+const Map = ({
+  tab, setMap,
+}) => {
+  const [lng, setLng] = useState(24.9454);
+  const [lat, setLat] = useState(60.1655);
+  const [zoom, setZoom] = useState(13.76);
+
+  const classes = useStyles();
+
+  const mapContainer = useRef();
+
+  setupMap({
+    setMap, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+  });
 
   mapboxgl.workerClass = MapboxWorker;
   mapboxgl.accessToken = 'pk.eyJ1Ijoia2ltbW9sZXBvbGEiLCJhIjoiY2ttdWdsY2w3MTFrbTJvcDljcnc0dTdvbSJ9.Fqbb2Qe_1SRfNZrx4KaH7A';
 
   return (
-    <Box className={classes.container}>
+    <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
       <div className={classes.sidebar}>
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
       </div>
       <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
     </Box>
-  );
-};
-
-const Cont = () => {
-  const classes = useStyles();
-  return (
-    <div className={classes.container}>hello</div>
   );
 };
 

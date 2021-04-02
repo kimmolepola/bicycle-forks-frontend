@@ -19,3 +19,4 @@ päivä		aika	kumul.	mitä tein
 			1:30	28		Add items to map
 			0:30	28:30	Host app in Azure
 1.4.		1:30	30		Map point popups
+2.4.		4		34		Map point query

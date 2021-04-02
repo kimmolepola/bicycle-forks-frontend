@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline, Hidden, Typography, Link, Box,
+  CssBaseline, Hidden, Typography, Link, Box, Button,
 } from '@material-ui/core';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import ReactDOM from 'react-dom';
+import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker';  // eslint-disable-line
 import Navigator from './components/Navigator';
-import Content from './components/Map';
+import Map from './components/Map';
 import Header from './components/Header';
 import Theme from './Theme';
+import Search from './components/Search';
 
 const drawerWidth = 256;
 
@@ -55,9 +59,13 @@ const useStyles = makeStyles({
   },
 });
 
-function App() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+const App = () => {
+  const [tab, setTab] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [map, setMap] = useState(null);
+
   const classes = useStyles();
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -80,9 +88,18 @@ function App() {
           </Hidden>
         </nav>
         <div className={classes.app}>
-          <Header className={classes.header} onDrawerToggle={handleDrawerToggle} />
+          <Header
+            tab={tab}
+            setTab={setTab}
+            className={classes.header}
+            onDrawerToggle={handleDrawerToggle}
+          />
           <main className={classes.main}>
-            <Content />
+            <Map
+              tab={tab}
+              setMap={setMap}
+            />
+            <Search tab={tab} map={map} />
           </main>
           <footer className={classes.footer}>
             <Copyright />
@@ -91,6 +108,8 @@ function App() {
       </div>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
+
+//            <Content tab={tab} lng={lng} lat={lat} zoom={zoom} mapContainer={mapContainer} />

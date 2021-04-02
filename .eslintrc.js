@@ -39,6 +39,8 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'no-nested-ternary': 'off',
     'no-unused-vars': 'off',
+    'no-console': 'off',
+    'max-len': 'warn',
   },
   parser: 'babel-eslint',
 };

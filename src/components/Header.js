@@ -30,7 +30,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Header = ({ onDrawerToggle }) => {
+const Header = ({ onDrawerToggle, tab, setTab }) => {
   const classes = useStyles();
 
   return (
@@ -107,10 +107,10 @@ const Header = ({ onDrawerToggle }) => {
         position="static"
         elevation={0}
       >
-        <Tabs value={0} textColor="inherit">
-          <Tab textColor="inherit" label="Table" />
-          <Tab textColor="inherit" label="Search" />
-          <Tab textColor="inherit" label="Add" />
+        <Tabs value={tab} textColor="inherit">
+          <Tab onClick={() => setTab(0)} textColor="inherit" label="Map" />
+          <Tab onClick={() => setTab(1)} textColor="inherit" label="Search" />
+          <Tab onClick={() => setTab(2)} textColor="inherit" label="Add" />
         </Tabs>
       </AppBar>
     </>
