@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Container, Paper, Button, Link, TextField,
+  Box, Container, Paper, Button, Link, TextField, Card, Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -13,37 +13,46 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Search = ({ tab, map }) => {
+const Search = ({ tab, features }) => {
   const [textFieldValue, setTextFieldValue] = useState('');
-  const [mapPoint, setMapPoint] = useState(null);
-  const [features, setFeatures] = useState(null);
-  const classes = useStyles();
+  const [result, setResult] = useState([]);
 
-  useEffect(() => {
-    let ftrs;
-    if (map) {
-      ftrs = map.querySourceFeatures(
-        map.getLayer('safebike-tileset').source,
-        { sourceLayer: 'safebike-tileset' },
-      );
-    }
-    console.log(ftrs);
-    setFeatures(ftrs);
-  }, [map]);
+  const classes = useStyles();
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log(textFieldValue);
-    const result = features.find((feature) => feature.id === parseInt(textFieldValue, 10));
-    console.log('id: ', result ? result.id : null);
-    console.log('type: ', result ? result.properties.type : null);
-    console.log('coordinates: ', result ? result.geometry.coordinates : null);
+    if (textFieldValue === '') {
+      setResult(features.reduce((acc, cur) => {
+        if (cur.id) {
+          if (!acc.find((x) => x.id === cur.id)) {
+            acc.push(cur);
+          }
+        }
+        return acc;
+      }, []));
+    } else {
+      setResult(features
+        ? [features.find((feature) => feature.id === parseInt(textFieldValue, 10))]
+        : []);
+    }
     setTextFieldValue('');
   };
 
   return (
     <form style={{ display: tab === 1 ? '' : 'none' }} onSubmit={onSubmit} className={classes.root} noValidate autoComplete="off">
       <TextField placeholder="Point ID" onChange={(x) => setTextFieldValue(x.target.value)} value={textFieldValue} id="outlined-basic" label="Search" variant="outlined" />
+      <Card style={{ width: 'auto', display: result[0] ? '' : 'none', padding: 10 }}>
+        {result.map((x, y) => (x
+          ? (
+            <div key={x.id.toString(10).concat(y)}>
+              <Typography variant="h6" noWrap>Point ID: {x.id}</Typography>
+              <Typography variant="body2" noWrap>Type: {x.properties.type}</Typography>
+              <Typography variant="body2" noWrap>Coordinates: {x.geometry.coordinates.join(', ')}</Typography>
+            </div>
+          )
+          : null
+        ))}
+      </Card>
     </form>
   );
 };

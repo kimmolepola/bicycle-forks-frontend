@@ -37,32 +37,48 @@ const useStyles = makeStyles({
 });
 
 const setupMap = ({
-  setMap, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+  setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
 }) => {
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       // style: 'mapbox://styles/mapbox/streets-v11',
-      style: 'mapbox://styles/kimmolepola/ckmxq3iyb123d17n26udep7h5',
+      style: process.env.REACT_APP_MAPPBOX_STYLE,
       center: [lng, lat],
       zoom,
     });
 
-    setMap(map);
+    map.on('load', () => {
+      const fetchFeatures = async () => {
+        try {
+          const layer = await map.getLayer(process.env.REACT_APP_MAPBOX_TILESET);
+          if (layer && layer.source) {
+            const features = await map.querySourceFeatures(
+              layer.source,
+              { sourceLayer: process.env.REACT_APP_MAPBOX_TILESET },
+            );
+            setFeatures(features);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchFeatures();
+    });
 
     // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'safebike-tileset', () => {
+    map.on('mouseenter', process.env.REACT_APP_MAPBOX_TILESET, () => {
       map.getCanvas().style.cursor = 'pointer';
     });
 
     // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'safebike-tileset', () => {
+    map.on('mouseleave', process.env.REACT_APP_MAPBOX_TILESET, () => {
       map.getCanvas().style.cursor = '';
     });
 
     map.on('click', (e) => {
       const features = map.queryRenderedFeatures(e.point, {
-        layers: ['safebike-tileset'], // replace this with the name of the layer
+        layers: [process.env.REACT_APP_MAPBOX_TILESET], // replace this with the name of the layer
       });
 
       if (!features.length) {
@@ -89,13 +105,12 @@ const setupMap = ({
 
     return () => {
       map.remove();
-      setMap(null);
     };
   }, []);
 };
 
 const Map = ({
-  tab, setMap,
+  tab, setFeatures,
 }) => {
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
@@ -106,11 +121,11 @@ const Map = ({
   const mapContainer = useRef();
 
   setupMap({
-    setMap, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+    setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
   });
 
   mapboxgl.workerClass = MapboxWorker;
-  mapboxgl.accessToken = 'pk.eyJ1Ijoia2ltbW9sZXBvbGEiLCJhIjoiY2ttdWdsY2w3MTFrbTJvcDljcnc0dTdvbSJ9.Fqbb2Qe_1SRfNZrx4KaH7A';
+  mapboxgl.accessToken = process.env.REACT_APP_MAPBOXGL_ACCESSTOKEN;
 
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>

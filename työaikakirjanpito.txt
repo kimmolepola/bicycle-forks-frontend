@@ -20,3 +20,6 @@ päivä		aika	kumul.	mitä tein
 			0:30	28:30	Host app in Azure
 1.4.		1:30	30		Map point popups
 2.4.		4		34		Map point query
+3.4.		1:30	35:30	Query bug fix
+			2:45	38:15	CSS, UI map point search
+			0:15	38:30	Env variables in Azure

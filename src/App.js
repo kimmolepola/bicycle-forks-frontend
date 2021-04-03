@@ -62,7 +62,7 @@ const useStyles = makeStyles({
 const App = () => {
   const [tab, setTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [map, setMap] = useState(null);
+  const [features, setFeatures] = useState(null);
 
   const classes = useStyles();
 
@@ -97,9 +97,9 @@ const App = () => {
           <main className={classes.main}>
             <Map
               tab={tab}
-              setMap={setMap}
+              setFeatures={setFeatures}
             />
-            <Search tab={tab} map={map} />
+            <Search tab={tab} features={features} />
           </main>
           <footer className={classes.footer}>
             <Copyright />
@@ -111,5 +111,3 @@ const App = () => {
 };
 
 export default App;
-
-//            <Content tab={tab} lng={lng} lat={lat} zoom={zoom} mapContainer={mapContainer} />
