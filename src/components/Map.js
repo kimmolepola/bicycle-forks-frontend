@@ -88,7 +88,7 @@ const setupMap = ({
       const feature = features[0];
 
       const content = document.createElement('div');
-      ReactDOM.render(<Button onClick={(x) => console.log('click: ', feature)}>click</Button>, content);
+      ReactDOM.render(<div>ID: {feature.id}</div>, content);
 
       const popup = new mapboxgl.Popup({ offset: [0, -15] })
         .setLngLat(feature.geometry.coordinates)

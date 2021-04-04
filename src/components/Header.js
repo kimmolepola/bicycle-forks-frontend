@@ -109,7 +109,7 @@ const Header = ({ onDrawerToggle, tab, setTab }) => {
       >
         <Tabs value={tab} textColor="inherit">
           <Tab onClick={() => setTab(0)} textColor="inherit" label="Map" />
-          <Tab onClick={() => setTab(1)} textColor="inherit" label="Search" />
+          <Tab onClick={() => setTab(1)} textColor="inherit" label="Point" />
           <Tab onClick={() => setTab(2)} textColor="inherit" label="Add" />
         </Tabs>
       </AppBar>

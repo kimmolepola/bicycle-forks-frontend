@@ -41,6 +41,7 @@ module.exports = {
     'no-unused-vars': 'off',
     'no-console': 'off',
     'max-len': 'warn',
+    'linebreak-style': 'off',
   },
   parser: 'babel-eslint',
 };
