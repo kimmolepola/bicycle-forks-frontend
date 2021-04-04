@@ -37,7 +37,7 @@ const useStyles = makeStyles({
 });
 
 const setupMap = ({
-  setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+  setTab, setSelectedFeatures, setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
 }) => {
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -87,8 +87,19 @@ const setupMap = ({
 
       const feature = features[0];
 
+      const onClick = () => {
+        setSelectedFeatures([feature]);
+        setTab(1);
+      };
+
       const content = document.createElement('div');
-      ReactDOM.render(<div>ID: {feature.id}</div>, content);
+      ReactDOM.render(
+        <div>
+          <div>ID: {feature.id}</div>
+          <Button onClick={onClick}>more</Button>
+        </div>,
+        content,
+      );
 
       const popup = new mapboxgl.Popup({ offset: [0, -15] })
         .setLngLat(feature.geometry.coordinates)
@@ -110,7 +121,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  tab, setFeatures,
+  tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
@@ -121,7 +132,7 @@ const Map = ({
   const mapContainer = useRef();
 
   setupMap({
-    setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+    setTab, setSelectedFeatures, setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
   });
 
   mapboxgl.workerClass = MapboxWorker;

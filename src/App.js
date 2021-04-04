@@ -63,6 +63,7 @@ const App = () => {
   const [tab, setTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [features, setFeatures] = useState(null);
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
 
   const classes = useStyles();
 
@@ -97,9 +98,16 @@ const App = () => {
           <main className={classes.main}>
             <Map
               tab={tab}
+              setTab={setTab}
               setFeatures={setFeatures}
+              setSelectedFeatures={setSelectedFeatures}
             />
-            <Search tab={tab} features={features} />
+            <Search
+              tab={tab}
+              features={features}
+              selectedFeatures={selectedFeatures}
+              setSelectedFeatures={setSelectedFeatures}
+            />
           </main>
           <footer className={classes.footer}>
             <Copyright />

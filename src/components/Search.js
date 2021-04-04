@@ -18,9 +18,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Search = ({ tab, features }) => {
+const Search = ({
+  setSelectedFeatures, selectedFeatures, tab, features,
+}) => {
   const [textFieldValue, setTextFieldValue] = useState('');
-  const [result, setResult] = useState([]);
   const [active, setActive] = useState(null);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const Search = ({ tab, features }) => {
   const searchOnSubmit = (e) => {
     e.preventDefault();
     if (textFieldValue === '') {
-      setResult(features.reduce((acc, cur) => {
+      setSelectedFeatures(features.reduce((acc, cur) => {
         if (cur.id) {
           if (!acc.find((x) => x.id === cur.id)) {
             acc.push(cur);
@@ -48,7 +49,7 @@ const Search = ({ tab, features }) => {
         return acc;
       }, []));
     } else {
-      setResult(features
+      setSelectedFeatures(features
         ? [features.find((feature) => feature.id === parseInt(textFieldValue, 10))]
         : []);
     }
@@ -67,11 +68,11 @@ const Search = ({ tab, features }) => {
         }}
       >
         <div style={{
-          display: result[0] ? '' : 'none', flex: 1,
+          display: selectedFeatures[0] ? '' : 'none', flex: 1,
         }}
         >
           <Card style={{ padding: 10 }}>
-            {result.map((x, y) => (x
+            {selectedFeatures.map((x, y) => (x
               ? (
                 <div key={x.id.toString(10).concat(y)}>
                   <Typography variant="h6" noWrap>Point ID: {x.id}</Typography>
