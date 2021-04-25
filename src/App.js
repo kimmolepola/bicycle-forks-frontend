@@ -10,7 +10,8 @@ import Navigator from './components/Navigator';
 import Map from './components/Map';
 import Header from './components/Header';
 import Theme from './Theme';
-import Search from './components/Search';
+import Points from './components/Points';
+import Add from './components/Add';
 
 const drawerWidth = 256;
 
@@ -60,6 +61,7 @@ const useStyles = makeStyles({
 });
 
 const App = () => {
+  const [map, setMap] = useState(null);
   const [tab, setTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [features, setFeatures] = useState(null);
@@ -97,12 +99,20 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              setMap={setMap}
               tab={tab}
               setTab={setTab}
               setFeatures={setFeatures}
               setSelectedFeatures={setSelectedFeatures}
             />
-            <Search
+            <Points
+              tab={tab}
+              features={features}
+              selectedFeatures={selectedFeatures}
+              setSelectedFeatures={setSelectedFeatures}
+            />
+            <Add
+              map={map}
               tab={tab}
               features={features}
               selectedFeatures={selectedFeatures}

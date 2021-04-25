@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Search = ({
+const Points = ({
   setSelectedFeatures, selectedFeatures, tab, features,
 }) => {
   const [textFieldValue, setTextFieldValue] = useState('');
@@ -99,4 +99,4 @@ const Search = ({
   );
 };
 
-export default Search;
+export default Points;

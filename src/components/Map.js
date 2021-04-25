@@ -37,7 +37,17 @@ const useStyles = makeStyles({
 });
 
 const setupMap = ({
-  setTab, setSelectedFeatures, setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+  setMap,
+  setTab,
+  setSelectedFeatures,
+  setFeatures,
+  mapContainer,
+  lng,
+  lat,
+  zoom,
+  setLng,
+  setLat,
+  setZoom,
 }) => {
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -47,6 +57,8 @@ const setupMap = ({
       center: [lng, lat],
       zoom,
     });
+
+    setMap(map);
 
     map.on('load', () => {
       const fetchFeatures = async () => {
@@ -64,21 +76,97 @@ const setupMap = ({
         }
       };
       fetchFeatures();
+
+      // Add an image to use as a custom marker
+      map.loadImage(
+        'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+        (error, image) => {
+          if (error) throw error;
+          map.addImage('custom-marker', image);
+          // Add a GeoJSON source with 2 points
+          map.addSource('points', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: [
+                {
+                  // feature for point A
+                  id: 111,
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: [
+                      24.9454,
+                      60.1655,
+                    ],
+                  },
+                  properties: {
+                    title: 'Point A',
+                  },
+                },
+                {
+                  // feature for point B
+                  id: 112,
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: [
+                      24.9554,
+                      60.1755,
+                    ],
+                  },
+                  properties: {
+                    title: 'Point B',
+                  },
+                },
+              ],
+            },
+          });
+
+          // Add a symbol layer
+          map.addLayer({
+            id: 'points',
+            type: 'symbol',
+            source: 'points',
+            layout: {
+              'icon-image': 'custom-marker',
+              // get the title name from the source's "title" property
+              'text-field': ['get', 'title'],
+              'text-font': [
+                'Open Sans Semibold',
+                'Arial Unicode MS Bold',
+              ],
+              'text-offset': [0, 1.25],
+              'text-anchor': 'top',
+            },
+            paint: {
+              'text-color': 'white',
+              'text-halo-blur': 0,
+              'text-halo-width': 1,
+              'text-halo-color': 'black',
+            },
+          });
+        },
+      );
     });
 
+    const layerNames = [process.env.REACT_APP_MAPBOX_TILESET, 'points'];
+
+    layerNames.forEach((layerName) => {
     // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', process.env.REACT_APP_MAPBOX_TILESET, () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
+      map.on('mouseenter', layerName, () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
 
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', process.env.REACT_APP_MAPBOX_TILESET, () => {
-      map.getCanvas().style.cursor = '';
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', layerName, () => {
+        map.getCanvas().style.cursor = '';
+      });
     });
 
     map.on('click', (e) => {
       const features = map.queryRenderedFeatures(e.point, {
-        layers: [process.env.REACT_APP_MAPBOX_TILESET], // replace this with the name of the layer
+        layers: layerNames, // replace this with the name of the layer
       });
 
       if (!features.length) {
@@ -86,6 +174,8 @@ const setupMap = ({
       }
 
       const feature = features[0];
+
+      console.log(feature);
 
       const onClick = () => {
         setSelectedFeatures([feature]);
@@ -121,7 +211,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  tab, setFeatures, setSelectedFeatures, setTab,
+  setMap, tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
@@ -132,7 +222,17 @@ const Map = ({
   const mapContainer = useRef();
 
   setupMap({
-    setTab, setSelectedFeatures, setFeatures, mapContainer, lng, lat, zoom, setLng, setLat, setZoom,
+    setMap,
+    setTab,
+    setSelectedFeatures,
+    setFeatures,
+    mapContainer,
+    lng,
+    lat,
+    zoom,
+    setLng,
+    setLat,
+    setZoom,
   });
 
   mapboxgl.workerClass = MapboxWorker;

@@ -23,3 +23,4 @@ päivä		aika	kumul.	mitä tein
 3.4.		1:30	35:30	Query bug fix
 			2:45	38:15	CSS, UI map point search
 4.4			2:00	39:45	point edit, point page CSS, point button
+25.4		3:00	42:45	add points
