@@ -7,7 +7,10 @@ import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
+import { useQuery, gql } from '@apollo/client';
 import Theme from '../Theme';
+
+const ALL_POINTS = gql`query{allPoints}`;
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -37,31 +40,70 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const naviEditHandleClick = ({
-  map, e, mapContainer,
+  map, e, mapContainer, pointsSource, setPointsSource,
 }) => {
   console.log(e);
 
   console.log('mapContainer: ', mapContainer);
 
+  const inputTitle = React.createRef();
   const inputType = React.createRef();
+  const inputGroupID = React.createRef();
+  const inputCategory = React.createRef();
   const inputLng = React.createRef();
   const inputLat = React.createRef();
-
-  const onSubmit = (ev) => {
-    ev.preventDefault();
-    console.log('submit ', inputType.current.value);
-  };
 
   const content = document.createElement('div');
 
   const styleFormField = { marginTop: 10 };
 
+  const popup = new mapboxgl.Popup()
+    .setLngLat([e.lngLat.lng, e.lngLat.lat])
+    // .setHTML(`<h3>${feature.properties.type}</h3>`)
+    .setDOMContent(content)
+    .addTo(map);
+
+  const onSubmit = (ev) => {
+    ev.preventDefault();
+    console.log(map.getSource('points'));
+    const newPoint = {
+      // feature for point A
+      id: pointsSource.data.previousFeatureId + 1,
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          inputLng.current.value,
+          inputLat.current.value,
+        ],
+      },
+      properties: {
+        title: inputTitle.current.value,
+        type: inputType.current.value,
+        category: inputCategory.current.value,
+        groupID: inputGroupID.current.value,
+      },
+    };
+    const newPointsSource = { ...pointsSource };
+    newPointsSource.data.previousFeatureId = newPoint.id;
+    newPointsSource.data.features.push(newPoint);
+    setPointsSource(newPointsSource);
+    console.log(newPointsSource);
+    const setData = async () => {
+      await map.getSource('points').setData(newPointsSource.data);
+      popup.remove();
+    };
+    setData();
+  };
+
   ReactDOM.render(
-    <div style={{ position: 'relative', maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
+    <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
       <div>Add a point</div>
       <form onSubmit={onSubmit} noValidate autoComplete="off">
-        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. u-rack" id="outlined-basic" label="Type" />
-        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. u-rack" id="outlined-basic" label="Type" />
+        <TextField style={styleFormField} size="small" inputRef={inputTitle} placeholder="e.g. Point A" id="outlined-basic" label="Title" />
+        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. line" id="outlined-basic" label="Type" />
+        <TextField style={styleFormField} size="small" inputRef={inputGroupID} placeholder="" id="outlined-basic" label="GroupID" />
+        <TextField style={styleFormField} size="small" inputRef={inputCategory} placeholder="e.g. u-rack" id="outlined-basic" label="Category" />
         <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="outlined-basic" label="Longitude" />
         <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="outlined-basic" label="Latitude" />
         <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
@@ -69,12 +111,6 @@ const naviEditHandleClick = ({
     </div>,
     content,
   );
-
-  const popup = new mapboxgl.Popup({ offset: [0, -15] })
-    .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    // .setHTML(`<h3>${feature.properties.type}</h3>`)
-    .setDOMContent(content)
-    .addTo(map);
 };
 
 const naviAppHandleClick = ({
@@ -106,7 +142,7 @@ const naviAppHandleClick = ({
     content,
   );
 
-  const popup = new mapboxgl.Popup({ offset: [0, -15] })
+  const popup = new mapboxgl.Popup()
     .setLngLat(feature.geometry.coordinates)
     // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
@@ -114,8 +150,9 @@ const naviAppHandleClick = ({
 };
 
 const setupMap = ({
+  pointsSource,
+  setPointsSource,
   navi,
-  setMap,
   setTab,
   setSelectedFeatures,
   setFeatures,
@@ -135,8 +172,6 @@ const setupMap = ({
       center: [lng, lat],
       zoom,
     });
-
-    setMap(map);
 
     map.on('load', () => {
       const fetchFeatures = async () => {
@@ -162,44 +197,7 @@ const setupMap = ({
           if (error) throw error;
           map.addImage('custom-marker', image);
           // Add a GeoJSON source with 2 points
-          map.addSource('points', {
-            type: 'geojson',
-            data: {
-              type: 'FeatureCollection',
-              features: [
-                {
-                  // feature for point A
-                  id: 111,
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [
-                      24.9454,
-                      60.1655,
-                    ],
-                  },
-                  properties: {
-                    title: 'Point A',
-                  },
-                },
-                {
-                  // feature for point B
-                  id: 112,
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [
-                      24.9554,
-                      60.1755,
-                    ],
-                  },
-                  properties: {
-                    title: 'Point B',
-                  },
-                },
-              ],
-            },
-          });
+          map.addSource('points', pointsSource);
 
           // Add a symbol layer
           map.addLayer({
@@ -208,6 +206,7 @@ const setupMap = ({
             source: 'points',
             layout: {
               'icon-image': 'custom-marker',
+              'icon-anchor': 'bottom',
               // get the title name from the source's "title" property
               'text-field': ['get', 'title'],
               'text-font': [
@@ -226,6 +225,11 @@ const setupMap = ({
           });
         },
       );
+      const {
+        loading: pointsLoading, // eslint-disable-line
+        error: pointsError,
+        data: pointsData,
+      } = useQuery(ALL_POINTS);
     });
 
     const layerNames = [process.env.REACT_APP_MAPBOX_TILESET, 'points'];
@@ -243,6 +247,7 @@ const setupMap = ({
     });
 
     map.on('click', (e) => {
+      const popup = document.getElementsByClassName('mapboxgl-popup');
       switch (navi.current) {
         case 'App':
           naviAppHandleClick({
@@ -250,9 +255,13 @@ const setupMap = ({
           });
           break;
         case 'Edit':
-          naviEditHandleClick({
-            map, e, mapContainer,
-          });
+          if (popup.length) {
+            popup[0].remove();
+          } else {
+            naviEditHandleClick({
+              map, e, mapContainer, pointsSource, setPointsSource,
+            });
+          }
           break;
         default:
           break;
@@ -272,11 +281,36 @@ const setupMap = ({
 };
 
 const Map = ({
-  navigation, setMap, tab, setFeatures, setSelectedFeatures, setTab,
+  navigation, tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
+
+  const {
+    loading: pointsLoading, // eslint-disable-line
+    error: pointsError,
+    data: pointsData,
+  } = useQuery(ALL_POINTS);
+
+  console.log('pointsData: ', pointsData ? JSON.parse(pointsData.allPoints) : null);
+
+  const [pointsSource, setPointsSource] = useState({
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      previousFeatureId: 0,
+      features: [
+      ],
+    },
+  });
+
+  useEffect(() => {
+    const doIt = () => {
+      setPointsSource(pointsData.allPoints);
+    };
+    if (pointsData) { doIt(); }
+  }, [pointsData]);
 
   const classes = useStyles();
 
@@ -285,8 +319,9 @@ const Map = ({
   navi.current = navigation;
 
   setupMap({
+    pointsSource,
+    setPointsSource,
     navi,
-    setMap,
     setTab,
     setSelectedFeatures,
     setFeatures,

@@ -26,3 +26,5 @@ päivä		aika	kumul.	mitä tein
 25.4.		3:00	42:45	add points
 26.4.		3:00	45:45	edit mode
 27.4.		2:30	48:15	edit mode popup scroll
+			1:40	49:55	edit mode add point remove popup
+			1:15	51:10	backend query
