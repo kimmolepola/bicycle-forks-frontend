@@ -39,7 +39,7 @@ const Add = ({
   };
 
   return (
-    <div className={classes.root} style={{ display: tab === 2 ? 'flex' : 'none', flexDirection: 'column' }}>
+    <div className={classes.root} style={{ display: tab === 99 ? 'flex' : 'none', flexDirection: 'column' }}>
       <form className={classes.item} onSubmit={addOnSubmit} noValidate autoComplete="off">
         <TextField placeholder="Point Type" onChange={(x) => setPointTypeValue(x.target.value)} value={pointTypeValue} id="outlined-basic" label="PointType" variant="outlined" />
         <TextField placeholder="Point Coor X" onChange={(x) => setPointCoordinateXValue(x.target.value)} value={pointCoordinateXValue} id="outlined-basic" label="PointCoorX" variant="outlined" />

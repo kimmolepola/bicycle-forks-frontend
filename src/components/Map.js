@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Container, Paper, Button, Link,
+  Box, Container, Paper, Button, Link, FormControlLabel, Switch, TextField,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import ReactDOM from 'react-dom';
 import Theme from '../Theme';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   container: {
     flex: 1,
     position: 'relative',
@@ -34,9 +34,87 @@ const useStyles = makeStyles({
     margin: '12px',
     borderRadius: '4px',
   },
-});
+}));
+
+const naviEditHandleClick = ({
+  map, e, mapContainer,
+}) => {
+  console.log(e);
+
+  console.log('mapContainer: ', mapContainer);
+
+  const inputType = React.createRef();
+  const inputLng = React.createRef();
+  const inputLat = React.createRef();
+
+  const onSubmit = (ev) => {
+    ev.preventDefault();
+    console.log('submit ', inputType.current.value);
+  };
+
+  const content = document.createElement('div');
+
+  const styleFormField = { marginTop: 10 };
+
+  ReactDOM.render(
+    <div style={{ position: 'relative', maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
+      <div>Add a point</div>
+      <form onSubmit={onSubmit} noValidate autoComplete="off">
+        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. u-rack" id="outlined-basic" label="Type" />
+        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. u-rack" id="outlined-basic" label="Type" />
+        <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="outlined-basic" label="Longitude" />
+        <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="outlined-basic" label="Latitude" />
+        <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
+      </form>
+    </div>,
+    content,
+  );
+
+  const popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat([e.lngLat.lng, e.lngLat.lat])
+    // .setHTML(`<h3>${feature.properties.type}</h3>`)
+    .setDOMContent(content)
+    .addTo(map);
+};
+
+const naviAppHandleClick = ({
+  map, e, layerNames, setSelectedFeatures, setTab,
+}) => {
+  const features = map.queryRenderedFeatures(e.point, {
+    layers: layerNames, // replace this with the name of the layer
+  });
+
+  if (!features.length) {
+    return;
+  }
+
+  const feature = features[0];
+
+  console.log(feature);
+
+  const onClick = () => {
+    setSelectedFeatures([feature]);
+    setTab(1);
+  };
+
+  const content = document.createElement('div');
+  ReactDOM.render(
+    <div>
+      <div>ID: {feature.id}</div>
+      <Button onClick={onClick}>more</Button>
+    </div>,
+    content,
+  );
+
+  const popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat(feature.geometry.coordinates)
+    // .setHTML(`<h3>${feature.properties.type}</h3>`)
+    .setDOMContent(content)
+    .addTo(map);
+};
 
 const setupMap = ({
+  navi,
   setMap,
   setTab,
   setSelectedFeatures,
@@ -165,37 +243,20 @@ const setupMap = ({
     });
 
     map.on('click', (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: layerNames, // replace this with the name of the layer
-      });
-
-      if (!features.length) {
-        return;
+      switch (navi.current) {
+        case 'App':
+          naviAppHandleClick({
+            map, layerNames, setSelectedFeatures, setTab, e,
+          });
+          break;
+        case 'Edit':
+          naviEditHandleClick({
+            map, e, mapContainer,
+          });
+          break;
+        default:
+          break;
       }
-
-      const feature = features[0];
-
-      console.log(feature);
-
-      const onClick = () => {
-        setSelectedFeatures([feature]);
-        setTab(1);
-      };
-
-      const content = document.createElement('div');
-      ReactDOM.render(
-        <div>
-          <div>ID: {feature.id}</div>
-          <Button onClick={onClick}>more</Button>
-        </div>,
-        content,
-      );
-
-      const popup = new mapboxgl.Popup({ offset: [0, -15] })
-        .setLngLat(feature.geometry.coordinates)
-        // .setHTML(`<h3>${feature.properties.type}</h3>`)
-        .setDOMContent(content)
-        .addTo(map);
     });
 
     map.on('move', () => {
@@ -211,7 +272,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  setMap, tab, setFeatures, setSelectedFeatures, setTab,
+  navigation, setMap, tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
@@ -220,8 +281,11 @@ const Map = ({
   const classes = useStyles();
 
   const mapContainer = useRef();
+  const navi = useRef();
+  navi.current = navigation;
 
   setupMap({
+    navi,
     setMap,
     setTab,
     setSelectedFeatures,

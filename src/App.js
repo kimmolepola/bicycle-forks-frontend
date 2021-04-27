@@ -66,6 +66,7 @@ const App = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [features, setFeatures] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [navigation, setNavigation] = useState('App');
 
   const classes = useStyles();
 
@@ -84,10 +85,16 @@ const App = () => {
               variant="temporary"
               open={mobileOpen}
               onClose={handleDrawerToggle}
+              navigation={navigation}
+              setNavigation={setNavigation}
             />
           </Hidden>
           <Hidden xsDown implementation="css">
-            <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+            <Navigator
+              PaperProps={{ style: { width: drawerWidth } }}
+              navigation={navigation}
+              setNavigation={setNavigation}
+            />
           </Hidden>
         </nav>
         <div className={classes.app}>
@@ -99,6 +106,7 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              navigation={navigation}
               setMap={setMap}
               tab={tab}
               setTab={setTab}

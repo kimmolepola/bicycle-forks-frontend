@@ -24,14 +24,6 @@ import {
 } from '@material-ui/icons';
 import Theme from '../Theme';
 
-const categories = [
-  {
-    id: 'Content',
-    children: [
-      { id: 'Bike Stands', icon: <DirectionsBikeIcon />, active: true }],
-  },
-];
-
 const useStyles = makeStyles({
   categoryHeader: {
     paddingTop: Theme.spacing(2),
@@ -73,8 +65,21 @@ const useStyles = makeStyles({
   },
 });
 
-const Navigator = ({ ...other }) => {
+const Navigator = ({ navigation, setNavigation, ...other }) => {
   const classes = useStyles();
+
+  const categories = [
+    {
+      id: 'User',
+      children: [
+        { id: 'App', icon: <DirectionsBikeIcon /> }],
+    },
+    {
+      id: 'Admin',
+      children: [
+        { id: 'Edit', icon: <DirectionsBikeIcon /> }],
+    },
+  ];
 
   return (
     <Drawer variant="permanent" {...other}>
@@ -93,11 +98,12 @@ const Navigator = ({ ...other }) => {
                 {id}
               </ListItemText>
             </ListItem>
-            {children.map(({ id: childId, icon, active }) => (
+            {children.map(({ id: childId, icon }) => (
               <ListItem
                 key={childId}
                 button
-                className={clsx(classes.item, active && classes.itemActiveItem)}
+                className={clsx(classes.item, childId === navigation && classes.itemActiveItem)}
+                onClick={() => setNavigation(childId)}
               >
                 <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
                 <ListItemText
