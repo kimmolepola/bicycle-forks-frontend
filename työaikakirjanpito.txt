@@ -28,3 +28,4 @@ päivä		aika	kumul.	mitä tein
 27.4.		2:30	48:15	edit mode popup scroll
 			1:40	49:55	edit mode add point remove popup
 			1:15	51:10	backend query
+28.4.		6:35	57:45	initial query, backend add point, frontend refresh

@@ -7,10 +7,10 @@ import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
-import {
-  useMutation, useQuery, gql,
-} from '@apollo/client';
+import { useQuery, gql } from '@apollo/client';
 import Theme from '../Theme';
+
+const ALL_POINTS = gql`query{allPoints}`;
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -39,20 +39,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ALL_POINTS = gql`query{allPoints}`;
-const ADD_POINT = gql`mutation ($point: String!){
-  addPoint(
-    point: $point
-  ) 
-}`;
-
-const handleError = (error) => {
-  console.error(error);
-};
-
 const naviEditHandleClick = ({
-  map, e, mapContainer, addPoint, setRefresh,
+  map, e, mapContainer, pointsSource, setPointsSource,
 }) => {
+  console.log(e);
+
+  console.log('mapContainer: ', mapContainer);
+
   const inputTitle = React.createRef();
   const inputType = React.createRef();
   const inputGroupID = React.createRef();
@@ -75,7 +68,7 @@ const naviEditHandleClick = ({
     console.log(map.getSource('points'));
     const newPoint = {
       // feature for point A
-      // id: pointsSource.data.previousFeatureId + 1,
+      id: pointsSource.data.previousFeatureId + 1,
       type: 'Feature',
       geometry: {
         type: 'Point',
@@ -91,21 +84,6 @@ const naviEditHandleClick = ({
         groupID: inputGroupID.current.value,
       },
     };
-    const asdf = async () => {
-      console.log('start');
-      const qwer = await addPoint({
-        variables: {
-          point: JSON.stringify(newPoint),
-        },
-      });
-      console.log('qwer: ', qwer);
-      console.log('continue');
-      setRefresh(true);
-    };
-    asdf();
-    popup.remove();
-
-    /*
     const newPointsSource = { ...pointsSource };
     newPointsSource.data.previousFeatureId = newPoint.id;
     newPointsSource.data.features.push(newPoint);
@@ -116,7 +94,6 @@ const naviEditHandleClick = ({
       popup.remove();
     };
     setData();
-    */
   };
 
   ReactDOM.render(
@@ -137,10 +114,10 @@ const naviEditHandleClick = ({
 };
 
 const naviAppHandleClick = ({
-  map, e, setSelectedFeatures, setTab,
+  map, e, layerNames, setSelectedFeatures, setTab,
 }) => {
   const features = map.queryRenderedFeatures(e.point, {
-    layers: ['points'], // replace this with the name of the layer
+    layers: layerNames, // replace this with the name of the layer
   });
 
   if (!features.length) {
@@ -173,12 +150,12 @@ const naviAppHandleClick = ({
 };
 
 const setupMap = ({
-  setRefresh,
-  addPoint,
-  setMap,
+  pointsSource,
+  setPointsSource,
   navi,
   setTab,
   setSelectedFeatures,
+  setFeatures,
   mapContainer,
   lng,
   lat,
@@ -187,179 +164,173 @@ const setupMap = ({
   setLat,
   setZoom,
 }) => {
-  mapboxgl.workerClass = MapboxWorker;
-  mapboxgl.accessToken = process.env.REACT_APP_MAPBOXGL_ACCESSTOKEN;
+  useEffect(() => {
+    const map = new mapboxgl.Map({
+      container: mapContainer.current,
+      // style: 'mapbox://styles/mapbox/streets-v11',
+      style: process.env.REACT_APP_MAPPBOX_STYLE,
+      center: [lng, lat],
+      zoom,
+    });
 
-  const map = new mapboxgl.Map({
-    container: mapContainer.current,
-    // style: 'mapbox://styles/mapbox/streets-v11',
-    style: process.env.REACT_APP_MAPPBOX_STYLE,
-    center: [lng, lat],
-    zoom,
-  });
-
-  map.on('load', () => {
-    // Add an image to use as a custom marker
-    map.loadImage(
-      'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
-      (error, image) => {
-        if (error) throw error;
-        map.addImage('custom-marker', image);
-
-        map.addSource('points', {
-          type: 'geojson',
-          tolerance: 0,
-          data: {
-            type: 'FeatureCollection',
-            previousFeatureId: 0,
-            features: [
-            ],
-          },
-        });
-
-        // Add a symbol layer
-        map.addLayer({
-          id: 'points',
-          type: 'symbol',
-          source: 'points',
-          layout: {
-            'icon-image': 'custom-marker',
-            'icon-anchor': 'bottom',
-            // get the title name from the source's "title" property
-            'text-field': ['get', 'title'],
-            'text-font': [
-              'Open Sans Semibold',
-              'Arial Unicode MS Bold',
-            ],
-            'text-offset': [0, 1.25],
-            'text-anchor': 'top',
-          },
-          paint: {
-            'text-color': 'white',
-            'text-halo-blur': 0,
-            'text-halo-width': 1,
-            'text-halo-color': 'black',
-          },
-        });
-        setMap(map);
-      },
-    );
-  });
-
-  // Change the cursor to a pointer when the mouse is over the places layer.
-  map.on('mouseenter', 'points', () => {
-    map.getCanvas().style.cursor = 'pointer';
-  });
-
-  // Change it back to a pointer when it leaves.
-  map.on('mouseleave', 'points', () => {
-    map.getCanvas().style.cursor = '';
-  });
-
-  map.on('click', (e) => {
-    const popup = document.getElementsByClassName('mapboxgl-popup');
-    switch (navi.current) {
-      case 'App':
-        naviAppHandleClick({
-          map, setSelectedFeatures, setTab, e,
-        });
-        break;
-      case 'Edit':
-        if (popup.length) {
-          console.log('popup ', popup[0]);
-          popup[0].remove();
-        } else {
-          naviEditHandleClick({
-            map, e, mapContainer, addPoint, setRefresh,
-          });
+    map.on('load', () => {
+      const fetchFeatures = async () => {
+        try {
+          const layer = await map.getLayer(process.env.REACT_APP_MAPBOX_TILESET);
+          if (layer && layer.source) {
+            const features = await map.querySourceFeatures(
+              layer.source,
+              { sourceLayer: process.env.REACT_APP_MAPBOX_TILESET },
+            );
+            setFeatures(features);
+          }
+        } catch (error) {
+          console.error(error);
         }
-        break;
-      default:
-        break;
-    }
-  });
+      };
+      fetchFeatures();
 
-  map.on('move', () => {
-    setLng(map.getCenter().lng.toFixed(4));
-    setLat(map.getCenter().lat.toFixed(4));
-    setZoom(map.getZoom().toFixed(2));
-  });
+      // Add an image to use as a custom marker
+      map.loadImage(
+        'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+        (error, image) => {
+          if (error) throw error;
+          map.addImage('custom-marker', image);
+          // Add a GeoJSON source with 2 points
+          map.addSource('points', pointsSource);
 
-  return () => {
-    map.remove();
-  };
+          // Add a symbol layer
+          map.addLayer({
+            id: 'points',
+            type: 'symbol',
+            source: 'points',
+            layout: {
+              'icon-image': 'custom-marker',
+              'icon-anchor': 'bottom',
+              // get the title name from the source's "title" property
+              'text-field': ['get', 'title'],
+              'text-font': [
+                'Open Sans Semibold',
+                'Arial Unicode MS Bold',
+              ],
+              'text-offset': [0, 1.25],
+              'text-anchor': 'top',
+            },
+            paint: {
+              'text-color': 'white',
+              'text-halo-blur': 0,
+              'text-halo-width': 1,
+              'text-halo-color': 'black',
+            },
+          });
+        },
+      );
+    });
+
+    const layerNames = [process.env.REACT_APP_MAPBOX_TILESET, 'points'];
+
+    layerNames.forEach((layerName) => {
+    // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on('mouseenter', layerName, () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', layerName, () => {
+        map.getCanvas().style.cursor = '';
+      });
+    });
+
+    map.on('click', (e) => {
+      const popup = document.getElementsByClassName('mapboxgl-popup');
+      switch (navi.current) {
+        case 'App':
+          naviAppHandleClick({
+            map, layerNames, setSelectedFeatures, setTab, e,
+          });
+          break;
+        case 'Edit':
+          if (popup.length) {
+            popup[0].remove();
+          } else {
+            naviEditHandleClick({
+              map, e, mapContainer, pointsSource, setPointsSource,
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    });
+
+    map.on('move', () => {
+      setLng(map.getCenter().lng.toFixed(4));
+      setLat(map.getCenter().lat.toFixed(4));
+      setZoom(map.getZoom().toFixed(2));
+    });
+
+    return () => {
+      map.remove();
+    };
+  }, []);
 };
 
 const Map = ({
   navigation, tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
-  const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
-  const [map, setMap] = useState(null);
-  const [refresh, setRefresh] = useState(false);
+
+  const {
+    loading: pointsLoading, // eslint-disable-line
+    error: pointsError,
+    data: pointsData,
+  } = useQuery(ALL_POINTS);
+
+  console.log('pointsData: ', pointsData ? JSON.parse(pointsData.allPoints) : null);
+
+  const [pointsSource, setPointsSource] = useState({
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      previousFeatureId: 0,
+      features: [
+      ],
+    },
+  });
+
+  useEffect(() => {
+    const doIt = () => {
+      setPointsSource(pointsData.allPoints);
+    };
+    if (pointsData) { doIt(); }
+  }, [pointsData]);
+
+  const classes = useStyles();
 
   const mapContainer = useRef();
   const navi = useRef();
   navi.current = navigation;
 
-  const {
-    refetch,
-    loading: pointsLoading,
-    error: pointsError,
-    data: pointsData,
-  } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
-
-  const [addPoint] = useMutation(ADD_POINT, {
-    onError: handleError,
-    // refetchQueries: [{ query: ALL_POINTS }],
+  setupMap({
+    pointsSource,
+    setPointsSource,
+    navi,
+    setTab,
+    setSelectedFeatures,
+    setFeatures,
+    mapContainer,
+    lng,
+    lat,
+    zoom,
+    setLng,
+    setLat,
+    setZoom,
   });
 
-  useEffect(() => {
-    setupMap({
-      setRefresh,
-      addPoint,
-      setMap,
-      navi,
-      setTab,
-      setSelectedFeatures,
-      setFeatures,
-      mapContainer,
-      lng,
-      lat,
-      zoom,
-      setLng,
-      setLat,
-      setZoom,
-    });
-  }, []);
-
-  // workaround for useEffect to notice change in pointsData
-  // after addPoint mutation fires refetchQueries
-  const asfd = pointsData || null;
-
-  useEffect(() => {
-    const doIt = () => {
-      if (refetch !== undefined) {
-        refetch().then(console.log('ok'));
-        setRefresh(false);
-      }
-    };
-    doIt();
-  }, [refresh]);
-
-  useEffect(() => {
-    const doIt = () => {
-      if (map && pointsData) {
-        const source = map.getSource('points');
-        if (source) {
-          map.getSource('points').setData(JSON.parse(pointsData.allPoints).data);
-        }
-      }
-    };
-    doIt();
-  }, [map, pointsData]);
+  mapboxgl.workerClass = MapboxWorker;
+  mapboxgl.accessToken = process.env.REACT_APP_MAPBOXGL_ACCESSTOKEN;
 
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
