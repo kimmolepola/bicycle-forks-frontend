@@ -50,8 +50,31 @@ const handleError = (error) => {
   console.error(error);
 };
 
+const setupPopupAnchor = ({ mapContainer, e }) => {
+  const mapDimensions = mapContainer.current.getBoundingClientRect();
+  const popupMaxHeight = mapContainer.current.clientHeight / 2;
+  const popupWidthAbout = 400;
+
+  let popupAnchor = 'left';
+  if (e.point.y <= popupMaxHeight / 2 && e.point.x < mapDimensions.width - popupWidthAbout) {
+    popupAnchor = 'top-left';
+  } else if (e.point.y <= popupMaxHeight / 2
+    && e.point.x >= mapDimensions.width - popupWidthAbout) {
+    popupAnchor = 'top-right';
+  } else if (e.point.y >= mapDimensions.height - popupMaxHeight / 2
+    && e.point.x < mapDimensions.width - popupWidthAbout) {
+    popupAnchor = 'bottom-left';
+  } else if (e.point.y >= mapDimensions.height - popupMaxHeight / 2
+    && e.point.x >= mapDimensions.width - popupWidthAbout) {
+    popupAnchor = 'bottom-right';
+  } else if (e.point.x >= mapDimensions.width - popupWidthAbout) {
+    popupAnchor = 'right';
+  }
+  return popupAnchor;
+};
+
 const naviEditHandleClick = ({
-  map, e, mapContainer, addPoint, setRefresh,
+  map, e, mapContainer, addPoint,
 }) => {
   const inputTitle = React.createRef();
   const inputType = React.createRef();
@@ -64,7 +87,9 @@ const naviEditHandleClick = ({
 
   const styleFormField = { marginTop: 10 };
 
-  const popup = new mapboxgl.Popup()
+  const popup = new mapboxgl.Popup({
+    anchor: setupPopupAnchor({ mapContainer, e }),
+  })
     .setLngLat([e.lngLat.lng, e.lngLat.lat])
     // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
@@ -91,18 +116,13 @@ const naviEditHandleClick = ({
         groupID: inputGroupID.current.value,
       },
     };
-    const asdf = async () => {
-      console.log('start');
-      const qwer = await addPoint({
-        variables: {
-          point: JSON.stringify(newPoint),
-        },
-      });
-      console.log('qwer: ', qwer);
-      console.log('continue');
-      setRefresh(true);
-    };
-    asdf();
+
+    addPoint({
+      variables: {
+        point: JSON.stringify(newPoint),
+      },
+    });
+
     popup.remove();
 
     /*
@@ -173,7 +193,6 @@ const naviAppHandleClick = ({
 };
 
 const setupMap = ({
-  setRefresh,
   addPoint,
   setMap,
   navi,
@@ -248,7 +267,9 @@ const setupMap = ({
 
   // Change the cursor to a pointer when the mouse is over the places layer.
   map.on('mouseenter', 'points', () => {
-    map.getCanvas().style.cursor = 'pointer';
+    if (navi.current !== 'Edit') {
+      map.getCanvas().style.cursor = 'pointer';
+    }
   });
 
   // Change it back to a pointer when it leaves.
@@ -256,27 +277,16 @@ const setupMap = ({
     map.getCanvas().style.cursor = '';
   });
 
+  map.on('contextmenu', (e) => {
+    naviEditHandleClick({
+      map, e, mapContainer, addPoint,
+    });
+  });
+
   map.on('click', (e) => {
-    const popup = document.getElementsByClassName('mapboxgl-popup');
-    switch (navi.current) {
-      case 'App':
-        naviAppHandleClick({
-          map, setSelectedFeatures, setTab, e,
-        });
-        break;
-      case 'Edit':
-        if (popup.length) {
-          console.log('popup ', popup[0]);
-          popup[0].remove();
-        } else {
-          naviEditHandleClick({
-            map, e, mapContainer, addPoint, setRefresh,
-          });
-        }
-        break;
-      default:
-        break;
-    }
+    naviAppHandleClick({
+      map, setSelectedFeatures, setTab, e,
+    });
   });
 
   map.on('move', () => {
@@ -298,27 +308,72 @@ const Map = ({
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
   const [map, setMap] = useState(null);
-  const [refresh, setRefresh] = useState(false);
 
   const mapContainer = useRef();
   const navi = useRef();
   navi.current = navigation;
 
   const {
-    refetch,
     loading: pointsLoading,
     error: pointsError,
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
 
+  /*
+  const refetch = () => {
+    console.log('asdf');
+  };
+  const pointsData = {
+    allPoints: JSON.stringify({
+      type: 'geojson',
+      tolerance: 0,
+      data: {
+        type: 'FeatureCollection',
+        previousFeatureId: 112,
+        features: [
+          {
+          // feature for point A
+            id: 111,
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                24.9454,
+                60.1655,
+              ],
+            },
+            properties: {
+              title: 'Point A',
+            },
+          },
+          {
+          // feature for point B
+            id: 112,
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                24.9554,
+                60.1755,
+              ],
+            },
+            properties: {
+              title: 'Point B',
+            },
+          },
+        ],
+      },
+    }),
+  };
+*/
+
   const [addPoint] = useMutation(ADD_POINT, {
     onError: handleError,
-    // refetchQueries: [{ query: ALL_POINTS }],
+    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
   });
 
   useEffect(() => {
     setupMap({
-      setRefresh,
       addPoint,
       setMap,
       navi,
@@ -337,20 +392,12 @@ const Map = ({
 
   // workaround for useEffect to notice change in pointsData
   // after addPoint mutation fires refetchQueries
-  const asfd = pointsData || null;
+  // const asfd = pointsData ? pointsData.length : null;
+  console.log(pointsData ? JSON.parse(pointsData.allPoints) : null);
 
   useEffect(() => {
     const doIt = () => {
-      if (refetch !== undefined) {
-        refetch().then(console.log('ok'));
-        setRefresh(false);
-      }
-    };
-    doIt();
-  }, [refresh]);
-
-  useEffect(() => {
-    const doIt = () => {
+      console.log('use effect fire');
       if (map && pointsData) {
         const source = map.getSource('points');
         if (source) {
