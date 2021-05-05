@@ -74,11 +74,6 @@ const Navigator = ({ navigation, setNavigation, ...other }) => {
       children: [
         { id: 'App', icon: <DirectionsBikeIcon /> }],
     },
-    {
-      id: 'Admin',
-      children: [
-        { id: 'Edit', icon: <DirectionsBikeIcon /> }],
-    },
   ];
 
   return (

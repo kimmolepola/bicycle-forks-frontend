@@ -73,7 +73,7 @@ const setupPopupAnchor = ({ mapContainer, e }) => {
   return popupAnchor;
 };
 
-const naviEditHandleClick = ({
+const handleRightClick = ({
   map, e, mapContainer, addPoint,
 }) => {
   const inputTitle = React.createRef();
@@ -91,16 +91,12 @@ const naviEditHandleClick = ({
     anchor: setupPopupAnchor({ mapContainer, e }),
   })
     .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
     .addTo(map);
 
   const onSubmit = (ev) => {
     ev.preventDefault();
-    console.log(map.getSource('points'));
     const newPoint = {
-      // feature for point A
-      // id: pointsSource.data.previousFeatureId + 1,
       type: 'Feature',
       geometry: {
         type: 'Point',
@@ -124,31 +120,18 @@ const naviEditHandleClick = ({
     });
 
     popup.remove();
-
-    /*
-    const newPointsSource = { ...pointsSource };
-    newPointsSource.data.previousFeatureId = newPoint.id;
-    newPointsSource.data.features.push(newPoint);
-    setPointsSource(newPointsSource);
-    console.log(newPointsSource);
-    const setData = async () => {
-      await map.getSource('points').setData(newPointsSource.data);
-      popup.remove();
-    };
-    setData();
-    */
   };
 
   ReactDOM.render(
     <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
       <div>Add a point</div>
       <form onSubmit={onSubmit} noValidate autoComplete="off">
-        <TextField style={styleFormField} size="small" inputRef={inputTitle} placeholder="e.g. Point A" id="outlined-basic" label="Title" />
-        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. line" id="outlined-basic" label="Type" />
-        <TextField style={styleFormField} size="small" inputRef={inputGroupID} placeholder="" id="outlined-basic" label="GroupID" />
-        <TextField style={styleFormField} size="small" inputRef={inputCategory} placeholder="e.g. u-rack" id="outlined-basic" label="Category" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="outlined-basic" label="Longitude" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="outlined-basic" label="Latitude" />
+        <TextField style={styleFormField} size="small" inputRef={inputTitle} placeholder="e.g. Point A" id="title" label="Title" />
+        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. line" id="type" label="Type" />
+        <TextField style={styleFormField} size="small" inputRef={inputGroupID} placeholder="" id="groupid" label="GroupID" />
+        <TextField style={styleFormField} size="small" inputRef={inputCategory} placeholder="e.g. u-rack" id="category" label="Category" />
+        <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="longitude" label="Longitude" />
+        <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="latitude" label="Latitude" />
         <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
       </form>
     </div>,
@@ -156,7 +139,7 @@ const naviEditHandleClick = ({
   );
 };
 
-const naviAppHandleClick = ({
+const handleLeftClick = ({
   map, e, setSelectedFeatures, setTab,
 }) => {
   const features = map.queryRenderedFeatures(e.point, {
@@ -168,8 +151,6 @@ const naviAppHandleClick = ({
   }
 
   const feature = features[0];
-
-  console.log(feature);
 
   const onClick = () => {
     setSelectedFeatures([feature]);
@@ -195,7 +176,6 @@ const naviAppHandleClick = ({
 const setupMap = ({
   addPoint,
   setMap,
-  navi,
   setTab,
   setSelectedFeatures,
   mapContainer,
@@ -267,9 +247,7 @@ const setupMap = ({
 
   // Change the cursor to a pointer when the mouse is over the places layer.
   map.on('mouseenter', 'points', () => {
-    if (navi.current !== 'Edit') {
-      map.getCanvas().style.cursor = 'pointer';
-    }
+    map.getCanvas().style.cursor = 'pointer';
   });
 
   // Change it back to a pointer when it leaves.
@@ -278,13 +256,13 @@ const setupMap = ({
   });
 
   map.on('contextmenu', (e) => {
-    naviEditHandleClick({
+    handleRightClick({
       map, e, mapContainer, addPoint,
     });
   });
 
   map.on('click', (e) => {
-    naviAppHandleClick({
+    handleLeftClick({
       map, setSelectedFeatures, setTab, e,
     });
   });
@@ -301,7 +279,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  navigation, tab, setFeatures, setSelectedFeatures, setTab,
+  tab, setFeatures, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
@@ -310,62 +288,12 @@ const Map = ({
   const [map, setMap] = useState(null);
 
   const mapContainer = useRef();
-  const navi = useRef();
-  navi.current = navigation;
 
   const {
     loading: pointsLoading,
     error: pointsError,
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
-
-  /*
-  const refetch = () => {
-    console.log('asdf');
-  };
-  const pointsData = {
-    allPoints: JSON.stringify({
-      type: 'geojson',
-      tolerance: 0,
-      data: {
-        type: 'FeatureCollection',
-        previousFeatureId: 112,
-        features: [
-          {
-          // feature for point A
-            id: 111,
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [
-                24.9454,
-                60.1655,
-              ],
-            },
-            properties: {
-              title: 'Point A',
-            },
-          },
-          {
-          // feature for point B
-            id: 112,
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [
-                24.9554,
-                60.1755,
-              ],
-            },
-            properties: {
-              title: 'Point B',
-            },
-          },
-        ],
-      },
-    }),
-  };
-*/
 
   const [addPoint] = useMutation(ADD_POINT, {
     onError: handleError,
@@ -376,7 +304,6 @@ const Map = ({
     setupMap({
       addPoint,
       setMap,
-      navi,
       setTab,
       setSelectedFeatures,
       setFeatures,
@@ -390,18 +317,14 @@ const Map = ({
     });
   }, []);
 
-  // workaround for useEffect to notice change in pointsData
-  // after addPoint mutation fires refetchQueries
-  // const asfd = pointsData ? pointsData.length : null;
-  console.log(pointsData ? JSON.parse(pointsData.allPoints) : null);
-
   useEffect(() => {
     const doIt = () => {
-      console.log('use effect fire');
       if (map && pointsData) {
         const source = map.getSource('points');
         if (source) {
-          map.getSource('points').setData(JSON.parse(pointsData.allPoints).data);
+          const featuresData = JSON.parse(pointsData.allPoints).data;
+          map.getSource('points').setData(featuresData);
+          setFeatures(featuresData.features);
         }
       }
     };

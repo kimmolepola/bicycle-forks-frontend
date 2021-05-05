@@ -11,7 +11,6 @@ import Map from './components/Map';
 import Header from './components/Header';
 import Theme from './Theme';
 import Points from './components/Points';
-import Add from './components/Add';
 
 const drawerWidth = 256;
 
@@ -45,7 +44,6 @@ const useStyles = makeStyles({
   main: {
     display: 'flex',
     flex: 1,
-    // padding: Theme.spacing(6, 4),
     paddingTop: Theme.spacing(6),
     paddingLeft: Theme.spacing(4),
     paddingRight: Theme.spacing(4),
@@ -114,13 +112,6 @@ const App = () => {
               setSelectedFeatures={setSelectedFeatures}
             />
             <Points
-              tab={tab}
-              features={features}
-              selectedFeatures={selectedFeatures}
-              setSelectedFeatures={setSelectedFeatures}
-            />
-            <Add
-              map={map}
               tab={tab}
               features={features}
               selectedFeatures={selectedFeatures}

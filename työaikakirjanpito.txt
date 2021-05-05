@@ -30,3 +30,4 @@ päivä		aika	kumul.	mitä tein
 			1:15	51:10	backend query
 28.4.		6:35	57:45	initial query, backend add point, frontend refresh
 29.4.		3:00	60:45	refetch, popup anchor
+5.5.		2:00	62:45	cleanup, point edit
