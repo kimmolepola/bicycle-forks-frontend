@@ -1,16 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Container, Paper, Button, Link, FormControlLabel, Switch, TextField,
+  Box, Button, TextField,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
-import {
-  useMutation, useQuery, gql,
-} from '@apollo/client';
-import Theme from '../Theme';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -38,17 +34,6 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '4px',
   },
 }));
-
-const ALL_POINTS = gql`query{allPoints}`;
-const ADD_POINT = gql`mutation ($point: String!){
-  addPoint(
-    point: $point
-  ) 
-}`;
-
-const handleError = (error) => {
-  console.error(error);
-};
 
 const setupPopupAnchor = ({ mapContainer, e }) => {
   const mapDimensions = mapContainer.current.getBoundingClientRect();
@@ -151,6 +136,7 @@ const handleLeftClick = ({
   }
 
   const feature = features[0];
+  feature.id = feature.id.toString();
 
   const onClick = () => {
     setSelectedFeatures([feature]);
@@ -279,26 +265,14 @@ const setupMap = ({
 };
 
 const Map = ({
-  tab, setFeatures, setSelectedFeatures, setTab,
+  setMap, addPoint, tab, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
-  const [map, setMap] = useState(null);
 
   const mapContainer = useRef();
-
-  const {
-    loading: pointsLoading,
-    error: pointsError,
-    data: pointsData,
-  } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
-
-  const [addPoint] = useMutation(ADD_POINT, {
-    onError: handleError,
-    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
-  });
 
   useEffect(() => {
     setupMap({
@@ -306,7 +280,6 @@ const Map = ({
       setMap,
       setTab,
       setSelectedFeatures,
-      setFeatures,
       mapContainer,
       lng,
       lat,
@@ -316,20 +289,6 @@ const Map = ({
       setZoom,
     });
   }, []);
-
-  useEffect(() => {
-    const doIt = () => {
-      if (map && pointsData) {
-        const source = map.getSource('points');
-        if (source) {
-          const featuresData = JSON.parse(pointsData.allPoints).data;
-          map.getSource('points').setData(featuresData);
-          setFeatures(featuresData.features);
-        }
-      }
-    };
-    doIt();
-  }, [map, pointsData]);
 
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>

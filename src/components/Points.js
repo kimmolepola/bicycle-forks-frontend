@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Container, Paper, Button, Link, TextField, Card, Typography,
+  Button, TextField, Card, Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Theme from '../Theme';
@@ -26,9 +26,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Points = ({
-  setSelectedFeatures, selectedFeatures, tab, features,
+  editPoint, setSelectedFeatures, selectedFeatures, tab, features,
 }) => {
-  const [textFieldValue, setTextFieldValue] = useState('');
+  const [searchFieldValue, setSearchFieldValue] = useState('');
+  const [previousSearchFieldValue, setPreviousSearchFieldValue] = useState(null);
   const [active, setActive] = useState(null);
   const [activeEdit, setActiveEdit] = useState({
     id: '',
@@ -36,8 +37,8 @@ const Points = ({
     category: '',
     groupID: '',
     type: '',
-    longitude: '',
-    latitude: '',
+    longitude: 0,
+    latitude: 0,
   });
 
   useEffect(() => {
@@ -48,8 +49,8 @@ const Points = ({
         category: active ? active.properties.category ? active.properties.category : '' : '',
         groupID: active ? active.properties.groupID ? active.properties.groupID : '' : '',
         type: active ? active.properties.type ? active.properties.type : '' : '',
-        longitude: active ? active.geometry.coordinates[0] ? active.geometry.coordinates[0] : '' : '',
-        latitude: active ? active.geometry.coordinates[1] ? active.geometry.coordinates[1] : '' : '',
+        longitude: active ? active.geometry.coordinates[0] ? active.geometry.coordinates[0] : 0 : 0,
+        latitude: active ? active.geometry.coordinates[1] ? active.geometry.coordinates[1] : 0 : 0,
       });
     };
     doit();
@@ -66,12 +67,21 @@ const Points = ({
 
   const editOnSubmit = (e) => {
     e.preventDefault();
-    console.log('submit: ', activeEdit);
+    editPoint({
+      variables: {
+        id: activeEdit.id,
+        title: activeEdit.title,
+        category: activeEdit.category,
+        type: activeEdit.type,
+        groupid: activeEdit.groupID,
+        lng: activeEdit.longitude,
+        lat: activeEdit.latitude,
+      },
+    });
   };
 
-  const searchOnSubmit = (e) => {
-    e.preventDefault();
-    if (textFieldValue === '') {
+  const search = ({ searchTerm }) => {
+    if (searchFieldValue === '') {
       if (features && features.length) {
         setSelectedFeatures(features.reduce((acc, cur) => {
           if (cur.id) {
@@ -86,16 +96,38 @@ const Points = ({
       }
     } else {
       setSelectedFeatures(features
-        ? [features.find((feature) => feature.id === parseInt(textFieldValue, 10))]
+        ? [features.find((feature) => feature.id === searchFieldValue)]
         : []);
     }
-    setTextFieldValue('');
+  };
+
+  useEffect(() => {
+    const doit = () => {
+      if (features && features.length) {
+        setSelectedFeatures(features.reduce((acc, cur) => {
+          if (cur.id) {
+            if (selectedFeatures.find((x) => x.id === cur.id)) {
+              acc.push(cur);
+            }
+          }
+          return acc;
+        }, []));
+      }
+    };
+    doit();
+  }, [features]);
+
+  const searchOnSubmit = (e) => {
+    e.preventDefault();
+    search({ searchTerm: searchFieldValue });
+    setPreviousSearchFieldValue(searchFieldValue);
+    setSearchFieldValue('');
   };
 
   return (
     <div className={classes.root} style={{ display: tab === 1 ? 'flex' : 'none', flexDirection: 'column' }}>
       <form className={classes.item} onSubmit={searchOnSubmit} noValidate autoComplete="off">
-        <TextField placeholder="Point ID" onChange={(x) => setTextFieldValue(x.target.value)} value={textFieldValue} id="search" label="Search" variant="outlined" />
+        <TextField placeholder="Point ID" onChange={(x) => setSearchFieldValue(x.target.value)} value={searchFieldValue} id="search" label="Search" variant="outlined" />
       </form>
       <div
         className={classes.item}
@@ -110,10 +142,14 @@ const Points = ({
           <Card style={{ padding: 10 }}>
             {selectedFeatures.map((x, y) => (x
               ? (
-                <div key={x.id.toString(10).concat(y)}>
-                  <Typography variant="h6" noWrap>Point ID: {x.id}</Typography>
+                <div key={x.id + y.toString()}>
+                  <Typography variant="h6" noWrap>{x.properties.title}</Typography>
+                  <Typography color="textSecondary" variant="body2" noWrap>ID: {x.id}</Typography>
+                  <Typography variant="body2" noWrap>Category: {x.properties.category}</Typography>
                   <Typography variant="body2" noWrap>Type: {x.properties.type}</Typography>
-                  <Typography variant="body2" noWrap>Coordinates: {x.geometry.coordinates.join(', ')}</Typography>
+                  <Typography variant="body2" noWrap>Group ID: {x.properties.groupID}</Typography>
+                  <Typography variant="body2" noWrap>Longitude: {x.geometry.coordinates[0]}</Typography>
+                  <Typography variant="body2" noWrap>Latitude: {x.geometry.coordinates[1]}</Typography>
                   <Button onClick={() => setActive(x)} variant="outlined" size="small" style={{ marginTop: Theme.spacing(1) }}>Edit</Button>
                 </div>
               )

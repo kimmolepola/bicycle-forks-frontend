@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline, Hidden, Typography, Link, Box, Button,
+  CssBaseline, Hidden, Typography, Link,
 } from '@material-ui/core';
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-import ReactDOM from 'react-dom';
-import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker';  // eslint-disable-line
+import {
+  useMutation, useQuery, gql,
+} from '@apollo/client';
 import Navigator from './components/Navigator';
 import Map from './components/Map';
 import Header from './components/Header';
@@ -58,6 +58,29 @@ const useStyles = makeStyles({
   },
 });
 
+const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupid: String, $lng: Float, $lat: Float){
+  editPoint(
+    id: $id
+    title: $title
+    category: $category
+    type: $type
+    groupid: $groupid
+    lng: $lng
+    lat: $lat
+  )
+}`;
+
+const ADD_POINT = gql`mutation ($point: String!){
+  addPoint(
+    point: $point
+  ) 
+}`;
+const ALL_POINTS = gql`query{allPoints}`;
+
+const handleError = (error) => {
+  console.error(error);
+};
+
 const App = () => {
   const [map, setMap] = useState(null);
   const [tab, setTab] = useState(0);
@@ -67,6 +90,36 @@ const App = () => {
   const [navigation, setNavigation] = useState('App');
 
   const classes = useStyles();
+
+  const [editPoint] = useMutation(EDIT_POINT, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
+  });
+
+  const [addPoint] = useMutation(ADD_POINT, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
+  });
+
+  const {
+    loading: pointsLoading,
+    error: pointsError,
+    data: pointsData,
+  } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
+
+  useEffect(() => {
+    const doIt = () => {
+      if (map && pointsData) {
+        const source = map.getSource('points');
+        if (source) {
+          const featuresData = JSON.parse(pointsData.allPoints).data;
+          map.getSource('points').setData(featuresData);
+          setFeatures(featuresData.features);
+        }
+      }
+    };
+    doIt();
+  }, [map, pointsData]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -104,6 +157,7 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              addPoint={addPoint}
               navigation={navigation}
               setMap={setMap}
               tab={tab}
@@ -112,6 +166,8 @@ const App = () => {
               setSelectedFeatures={setSelectedFeatures}
             />
             <Points
+              pointsData={pointsData}
+              editPoint={editPoint}
               tab={tab}
               features={features}
               selectedFeatures={selectedFeatures}
