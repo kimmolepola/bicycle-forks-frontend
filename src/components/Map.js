@@ -1,12 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Button, TextField,
+  Box, Button, TextField, Typography,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
+import Theme from '../Theme';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -138,25 +139,27 @@ const handleLeftClick = ({
   const feature = features[0];
   feature.id = feature.id.toString();
 
-  const onClick = () => {
-    setSelectedFeatures([feature]);
-    setTab(1);
-  };
-
   const content = document.createElement('div');
-  ReactDOM.render(
-    <div>
-      <div>ID: {feature.id}</div>
-      <Button onClick={onClick}>more</Button>
-    </div>,
-    content,
-  );
 
   const popup = new mapboxgl.Popup()
     .setLngLat(feature.geometry.coordinates)
     // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
     .addTo(map);
+
+  const onClick = () => {
+    setSelectedFeatures([feature]);
+    popup.remove();
+    setTab(1);
+  };
+
+  ReactDOM.render(
+    <div>
+      <Typography variant="body2">{feature.properties.title ? feature.properties.title : `id: ${feature.id}`}</Typography>
+      <Button style={{ marginTop: Theme.spacing(1) }} color="primary" variant="contained" onClick={onClick}>more</Button>
+    </div>,
+    content,
+  );
 };
 
 const setupMap = ({

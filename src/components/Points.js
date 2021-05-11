@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Button, TextField, Card, Typography,
+  Button,
+  TextField,
+  Card,
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Theme from '../Theme';
@@ -26,12 +34,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Points = ({
-  editPoint, setSelectedFeatures, selectedFeatures, tab, features,
+  deletePoint, editPoint, setSelectedFeatures, selectedFeatures, tab, features,
 }) => {
-  const [searchFieldValue, setSearchFieldValue] = useState('');
-  const [previousSearchFieldValue, setPreviousSearchFieldValue] = useState(null);
-  const [active, setActive] = useState(null);
-  const [activeEdit, setActiveEdit] = useState({
+  const emptyActiveEdit = {
+    delete: false,
     id: '',
     title: '',
     category: '',
@@ -39,31 +45,56 @@ const Points = ({
     type: '',
     longitude: 0,
     latitude: 0,
-  });
+  };
+  const [searchFieldValue, setSearchFieldValue] = useState('');
+  const [activeEdit, setActiveEdit] = useState(emptyActiveEdit);
 
-  useEffect(() => {
-    const doit = () => {
-      setActiveEdit({
-        id: active ? active.id ? active.id : '' : '',
-        title: active ? active.properties.title ? active.properties.title : '' : '',
-        category: active ? active.properties.category ? active.properties.category : '' : '',
-        groupID: active ? active.properties.groupID ? active.properties.groupID : '' : '',
-        type: active ? active.properties.type ? active.properties.type : '' : '',
-        longitude: active ? active.geometry.coordinates[0] ? active.geometry.coordinates[0] : 0 : 0,
-        latitude: active ? active.geometry.coordinates[1] ? active.geometry.coordinates[1] : 0 : 0,
-      });
-    };
-    doit();
-  }, [active]);
+  const classes = useStyles();
 
   useEffect(() => {
     const doIt = () => {
-      setActive(null);
+      setActiveEdit(emptyActiveEdit);
     };
     doIt();
   }, [tab]);
 
-  const classes = useStyles();
+  useEffect(() => {
+    const doit = () => {
+      if (features && features.length) {
+        setSelectedFeatures(features.reduce((acc, cur) => {
+          if (cur.id) {
+            if (selectedFeatures.find((x) => x.id === cur.id)) {
+              acc.push(cur);
+            }
+          }
+          return acc;
+        }, []));
+      }
+    };
+    doit();
+  }, [features]);
+
+  const handleEditClick = (feature) => {
+    setActiveEdit({
+      delete: false,
+      id: feature.id,
+      title: feature.properties.title ? feature.properties.title : '',
+      category: feature.properties.category ? feature.properties.category : '',
+      groupID: feature.properties.groupID ? feature.properties.groupID : '',
+      type: feature.properties.type ? feature.properties.type : '',
+      longitude: feature.geometry.coordinates[0] ? feature.geometry.coordinates[0] : 0,
+      latitude: feature.geometry.coordinates[1] ? feature.geometry.coordinates[1] : 0,
+    });
+  };
+
+  const handleDeleteDialogClose = () => {
+    setActiveEdit({ ...activeEdit, delete: false });
+  };
+
+  const handleDelete = async () => {
+    const asdf = await deletePoint({ variables: { id: activeEdit.id } });
+    setActiveEdit(emptyActiveEdit);
+  };
 
   const editOnSubmit = (e) => {
     e.preventDefault();
@@ -101,31 +132,35 @@ const Points = ({
     }
   };
 
-  useEffect(() => {
-    const doit = () => {
-      if (features && features.length) {
-        setSelectedFeatures(features.reduce((acc, cur) => {
-          if (cur.id) {
-            if (selectedFeatures.find((x) => x.id === cur.id)) {
-              acc.push(cur);
-            }
-          }
-          return acc;
-        }, []));
-      }
-    };
-    doit();
-  }, [features]);
-
   const searchOnSubmit = (e) => {
     e.preventDefault();
     search({ searchTerm: searchFieldValue });
-    setPreviousSearchFieldValue(searchFieldValue);
     setSearchFieldValue('');
   };
 
   return (
     <div className={classes.root} style={{ display: tab === 1 ? 'flex' : 'none', flexDirection: 'column' }}>
+      <Dialog
+        open={activeEdit.delete}
+        onClose={handleDeleteDialogClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete {activeEdit ? activeEdit.title : ''}?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            This action can not be undone
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="secondary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
       <form className={classes.item} onSubmit={searchOnSubmit} noValidate autoComplete="off">
         <TextField placeholder="Point ID" onChange={(x) => setSearchFieldValue(x.target.value)} value={searchFieldValue} id="search" label="Search" variant="outlined" />
       </form>
@@ -150,7 +185,7 @@ const Points = ({
                   <Typography variant="body2" noWrap>Group ID: {x.properties.groupID}</Typography>
                   <Typography variant="body2" noWrap>Longitude: {x.geometry.coordinates[0]}</Typography>
                   <Typography variant="body2" noWrap>Latitude: {x.geometry.coordinates[1]}</Typography>
-                  <Button onClick={() => setActive(x)} variant="outlined" size="small" style={{ marginTop: Theme.spacing(1) }}>Edit</Button>
+                  <Button onClick={() => handleEditClick(x)} variant="outlined" size="small" style={{ marginTop: Theme.spacing(1) }}>Edit</Button>
                 </div>
               )
               : null
@@ -158,11 +193,11 @@ const Points = ({
           </Card>
         </div>
 
-        <div style={{ display: active ? '' : 'none', flex: 1 }}>
+        <div style={{ display: activeEdit.id !== '' ? '' : 'none', flex: 1 }}>
           <Card style={{ padding: 10 }}>
             <form onSubmit={editOnSubmit} className={classes.form} noValidate autoComplete="off">
               <Typography variant="h6" noWrap>Edit</Typography>
-              <Typography variant="body2" noWrap>Point ID: {active ? active.id : null}</Typography>
+              <Typography variant="body2" noWrap>Point ID: {activeEdit.id}</Typography>
               <TextField onChange={(x) => setActiveEdit({ ...activeEdit, title: x.target.value })} value={activeEdit.title} label="Title" variant="outlined" />
               <TextField onChange={(x) => setActiveEdit({ ...activeEdit, category: x.target.value })} value={activeEdit.category} label="Category" variant="outlined" />
               <TextField onChange={(x) => setActiveEdit({ ...activeEdit, type: x.target.value })} value={activeEdit.type} label="Type" variant="outlined" />
@@ -170,6 +205,7 @@ const Points = ({
               <TextField onChange={(x) => setActiveEdit({ ...activeEdit, longitude: x.target.value })} value={activeEdit.longitude} label="Group ID" variant="outlined" />
               <TextField onChange={(x) => setActiveEdit({ ...activeEdit, latitude: x.target.value })} value={activeEdit.latitude} label="Group ID" variant="outlined" />
               <Button type="submit" variant="contained" color="primary">Submit</Button>
+              <Button color="secondary" onClick={() => setActiveEdit({ ...activeEdit, delete: true })} variant="outlined">Delete item</Button>
             </form>
           </Card>
         </div>

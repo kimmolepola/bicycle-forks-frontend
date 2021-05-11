@@ -58,6 +58,12 @@ const useStyles = makeStyles({
   },
 });
 
+const DELETE_POINT = gql`mutation ($id: ID!){
+  deletePoint(
+    id: $id
+  )
+}`;
+
 const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupid: String, $lng: Float, $lat: Float){
   editPoint(
     id: $id
@@ -90,6 +96,10 @@ const App = () => {
   const [navigation, setNavigation] = useState('App');
 
   const classes = useStyles();
+  const [deletePoint] = useMutation(DELETE_POINT, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
+  });
 
   const [editPoint] = useMutation(EDIT_POINT, {
     onError: handleError,
@@ -166,7 +176,7 @@ const App = () => {
               setSelectedFeatures={setSelectedFeatures}
             />
             <Points
-              pointsData={pointsData}
+              deletePoint={deletePoint}
               editPoint={editPoint}
               tab={tab}
               features={features}
