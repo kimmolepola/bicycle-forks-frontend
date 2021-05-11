@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Theme from '../Theme';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,7 +35,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Points = ({
-  deletePoint, editPoint, setSelectedFeatures, selectedFeatures, tab, features,
+  handleSnackbarMessage,
+  deletePoint,
+  editPoint,
+  setSelectedFeatures,
+  selectedFeatures,
+  tab,
+  features,
 }) => {
   const emptyActiveEdit = {
     delete: false,
@@ -51,12 +58,14 @@ const Points = ({
 
   const classes = useStyles();
 
+  /*
   useEffect(() => {
     const doIt = () => {
       setActiveEdit(emptyActiveEdit);
     };
     doIt();
   }, [tab]);
+  */
 
   useEffect(() => {
     const doit = () => {
@@ -92,13 +101,16 @@ const Points = ({
   };
 
   const handleDelete = async () => {
-    const asdf = await deletePoint({ variables: { id: activeEdit.id } });
-    setActiveEdit(emptyActiveEdit);
+    const deleteOperation = await deletePoint({ variables: { id: activeEdit.id } });
+    if (deleteOperation) {
+      handleSnackbarMessage({ severity: 'success', message: `${activeEdit.title} deleted` });
+      setActiveEdit(emptyActiveEdit);
+    }
   };
 
-  const editOnSubmit = (e) => {
+  const editOnSubmit = async (e) => {
     e.preventDefault();
-    editPoint({
+    const editOperation = await editPoint({
       variables: {
         id: activeEdit.id,
         title: activeEdit.title,
@@ -109,6 +121,10 @@ const Points = ({
         lat: activeEdit.latitude,
       },
     });
+    if (editOperation) {
+      handleSnackbarMessage({ severity: 'success', message: `${activeEdit.title} edited` });
+      setActiveEdit(emptyActiveEdit);
+    }
   };
 
   const search = ({ searchTerm }) => {
@@ -136,6 +152,7 @@ const Points = ({
     e.preventDefault();
     search({ searchTerm: searchFieldValue });
     setSearchFieldValue('');
+    setActiveEdit(emptyActiveEdit);
   };
 
   return (
@@ -195,18 +212,54 @@ const Points = ({
 
         <div style={{ display: activeEdit.id !== '' ? '' : 'none', flex: 1 }}>
           <Card style={{ padding: 10 }}>
-            <form onSubmit={editOnSubmit} className={classes.form} noValidate autoComplete="off">
+            <ValidatorForm onSubmit={editOnSubmit} className={classes.form} autoComplete="off">
               <Typography variant="h6" noWrap>Edit</Typography>
               <Typography variant="body2" noWrap>Point ID: {activeEdit.id}</Typography>
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, title: x.target.value })} value={activeEdit.title} label="Title" variant="outlined" />
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, category: x.target.value })} value={activeEdit.category} label="Category" variant="outlined" />
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, type: x.target.value })} value={activeEdit.type} label="Type" variant="outlined" />
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, groupID: x.target.value })} value={activeEdit.groupID} label="Group ID" variant="outlined" />
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, longitude: x.target.value })} value={activeEdit.longitude} label="Group ID" variant="outlined" />
-              <TextField onChange={(x) => setActiveEdit({ ...activeEdit, latitude: x.target.value })} value={activeEdit.latitude} label="Group ID" variant="outlined" />
+              <TextValidator
+                errorMessages={['this field is required']}
+                validators={['required']}
+                onChange={(x) => setActiveEdit({ ...activeEdit, title: x.target.value })}
+                value={activeEdit.title}
+                label="Title"
+                variant="outlined"
+              />
+              <TextField
+                onChange={(x) => setActiveEdit({ ...activeEdit, category: x.target.value })}
+                value={activeEdit.category}
+                label="Category"
+                variant="outlined"
+              />
+              <TextField
+                onChange={(x) => setActiveEdit({ ...activeEdit, type: x.target.value })}
+                value={activeEdit.type}
+                label="Type"
+                variant="outlined"
+              />
+              <TextField
+                onChange={(x) => setActiveEdit({ ...activeEdit, groupID: x.target.value })}
+                value={activeEdit.groupID}
+                label="Group ID"
+                variant="outlined"
+              />
+              <TextValidator
+                errorMessages={['this field is required', 'number required', 'number between -180 to 180 required', 'number between -180 to 180 required']}
+                validators={['required', 'isFloat', 'minNumber:-180', 'maxNumber:180']}
+                onChange={(x) => setActiveEdit({ ...activeEdit, longitude: x.target.value })}
+                value={activeEdit.longitude}
+                label="Longitude"
+                variant="outlined"
+              />
+              <TextValidator
+                errorMessages={['this field is required', 'number required', 'number between -90 to 90 required', 'number between -90 to 90 required']}
+                validators={['required', 'isFloat', 'minNumber:-90', 'maxNumber:90']}
+                onChange={(x) => setActiveEdit({ ...activeEdit, latitude: x.target.value })}
+                value={activeEdit.latitude}
+                label="Latitude"
+                variant="outlined"
+              />
               <Button type="submit" variant="contained" color="primary">Submit</Button>
-              <Button color="secondary" onClick={() => setActiveEdit({ ...activeEdit, delete: true })} variant="outlined">Delete item</Button>
-            </form>
+              <Button style={{ marginTop: Theme.spacing(4) }} color="secondary" onClick={() => setActiveEdit({ ...activeEdit, delete: true })} variant="outlined">Delete item</Button>
+            </ValidatorForm>
           </Card>
         </div>
       </div>

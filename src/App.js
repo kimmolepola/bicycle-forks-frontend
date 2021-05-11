@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline, Hidden, Typography, Link,
+  CssBaseline, Hidden, Typography, Link, Snackbar, Slide,
 } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import {
   useMutation, useQuery, gql,
 } from '@apollo/client';
+
 import Navigator from './components/Navigator';
 import Map from './components/Map';
 import Header from './components/Header';
@@ -83,10 +85,6 @@ const ADD_POINT = gql`mutation ($point: String!){
 }`;
 const ALL_POINTS = gql`query{allPoints}`;
 
-const handleError = (error) => {
-  console.error(error);
-};
-
 const App = () => {
   const [map, setMap] = useState(null);
   const [tab, setTab] = useState(0);
@@ -94,8 +92,22 @@ const App = () => {
   const [features, setFeatures] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [navigation, setNavigation] = useState('App');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarTransition] = useState(() => function slide(props) { return <Slide {...props} direction="left" />; });
+  const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'info' });
 
   const classes = useStyles();
+
+  const handleSnackbarMessage = ({ severity, message }) => {
+    setSnackbarMessage({ severity, message });
+    setSnackbarOpen(true);
+  };
+
+  const handleError = (error) => {
+    handleSnackbarMessage({ severity: 'error', message: error.message });
+    console.error(error);
+  };
+
   const [deletePoint] = useMutation(DELETE_POINT, {
     onError: handleError,
     refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
@@ -139,6 +151,11 @@ const App = () => {
     <ThemeProvider theme={Theme}>
       <div className={classes.root}>
         <CssBaseline />
+        <Snackbar TransitionComponent={snackbarTransition} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={snackbarOpen} autoHideDuration={5000}>
+          <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarMessage.severity}>
+            {snackbarMessage.message}
+          </Alert>
+        </Snackbar>
         <nav className={classes.drawer}>
           <Hidden smUp implementation="js">
             <Navigator
@@ -176,6 +193,7 @@ const App = () => {
               setSelectedFeatures={setSelectedFeatures}
             />
             <Points
+              handleSnackbarMessage={handleSnackbarMessage}
               deletePoint={deletePoint}
               editPoint={editPoint}
               tab={tab}

@@ -7,6 +7,7 @@ import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Theme from '../Theme';
 
 const useStyles = makeStyles((theme) => ({
@@ -69,7 +70,7 @@ const handleRightClick = ({
   const inputLng = React.createRef();
   const inputLat = React.createRef();
 
-  const content = document.createElement('div');
+  const divElement = document.createElement('div');
 
   const styleFormField = { marginTop: 10 };
 
@@ -77,51 +78,117 @@ const handleRightClick = ({
     anchor: setupPopupAnchor({ mapContainer, e }),
   })
     .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    .setDOMContent(content)
+    .setDOMContent(divElement)
     .addTo(map);
 
-  const onSubmit = (ev) => {
-    ev.preventDefault();
-    const newPoint = {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          inputLng.current.value,
-          inputLat.current.value,
-        ],
-      },
-      properties: {
-        title: inputTitle.current.value,
-        type: inputType.current.value,
-        category: inputCategory.current.value,
-        groupID: inputGroupID.current.value,
-      },
-    };
-
-    addPoint({
-      variables: {
-        point: JSON.stringify(newPoint),
-      },
-    });
-
+  const removePopup = () => {
     popup.remove();
   };
 
+  const PopupContent = () => {
+    const [fields, setFields] = useState({
+      title: '', type: '', category: '', groupID: '', lng: e.lngLat.lng, lat: e.lngLat.lat,
+    });
+
+    const onSubmit = (ev) => {
+      ev.preventDefault();
+      const newPoint = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            fields.lng,
+            fields.lat,
+          ],
+        },
+        properties: {
+          title: fields.title,
+          type: fields.type,
+          category: fields.category,
+          groupID: fields.groupID,
+        },
+      };
+
+      addPoint({
+        variables: {
+          point: JSON.stringify(newPoint),
+        },
+      });
+
+      popup.remove();
+    };
+
+    return (
+      <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
+        <div>Add a point</div>
+        <ValidatorForm onSubmit={onSubmit} autoComplete="off">
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. Point A"
+            id="title"
+            label="Title"
+            errorMessages={['this field is required']}
+            validators={['required']}
+            value={fields.title}
+            onChange={(x) => setFields({ ...fields, title: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. line"
+            id="type"
+            label="Type"
+            value={fields.type}
+            onChange={(x) => setFields({ ...fields, type: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder=""
+            id="groupid"
+            label="GroupID"
+            value={fields.groupID}
+            onChange={(x) => setFields({ ...fields, groupID: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. u-rack"
+            id="category"
+            label="Category"
+            value={fields.category}
+            onChange={(x) => setFields({ ...fields, category: x.target.value })}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="longitude"
+            label="Longitude"
+            value={fields.lng}
+            onChange={(x) => setFields({ ...fields, lng: x.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -180 to 180 required', 'number between -180 to 180 required']}
+            validators={['required', 'isFloat', 'minNumber:-180', 'maxNumber:180']}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="latitude"
+            label="Latitude"
+            value={fields.lat}
+            onChange={(x) => setFields({ ...fields, lat: x.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -90 to 90 required', 'number between -90 to 90 required']}
+            validators={['required', 'isFloat', 'minNumber:-90', 'maxNumber:90']}
+          />
+          <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
+        </ValidatorForm>
+      </div>
+    );
+  };
+
   ReactDOM.render(
-    <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
-      <div>Add a point</div>
-      <form onSubmit={onSubmit} noValidate autoComplete="off">
-        <TextField style={styleFormField} size="small" inputRef={inputTitle} placeholder="e.g. Point A" id="title" label="Title" />
-        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. line" id="type" label="Type" />
-        <TextField style={styleFormField} size="small" inputRef={inputGroupID} placeholder="" id="groupid" label="GroupID" />
-        <TextField style={styleFormField} size="small" inputRef={inputCategory} placeholder="e.g. u-rack" id="category" label="Category" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="longitude" label="Longitude" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="latitude" label="Latitude" />
-        <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
-      </form>
-    </div>,
-    content,
+    <PopupContent />,
+    divElement,
   );
 };
 

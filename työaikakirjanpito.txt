@@ -34,3 +34,4 @@ päivä		aika	kumul.	mitä tein
 9.5.		3:30	66:15	point edit
 10.5.		1:00	67:15	point edit
 11.5.		2:00	69:15	point delete
+			5:05	74:20	alert, form validation
