@@ -1,15 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Container, Paper, Button, Link, FormControlLabel, Switch, TextField,
+  Box, Button, TextField, Typography,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
-import {
-  useMutation, useQuery, gql,
-} from '@apollo/client';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Theme from '../Theme';
 
 const useStyles = makeStyles((theme) => ({
@@ -38,17 +36,6 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '4px',
   },
 }));
-
-const ALL_POINTS = gql`query{allPoints}`;
-const ADD_POINT = gql`mutation ($point: String!){
-  addPoint(
-    point: $point
-  ) 
-}`;
-
-const handleError = (error) => {
-  console.error(error);
-};
 
 const setupPopupAnchor = ({ mapContainer, e }) => {
   const mapDimensions = mapContainer.current.getBoundingClientRect();
@@ -83,7 +70,7 @@ const handleRightClick = ({
   const inputLng = React.createRef();
   const inputLat = React.createRef();
 
-  const content = document.createElement('div');
+  const divElement = document.createElement('div');
 
   const styleFormField = { marginTop: 10 };
 
@@ -91,51 +78,117 @@ const handleRightClick = ({
     anchor: setupPopupAnchor({ mapContainer, e }),
   })
     .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    .setDOMContent(content)
+    .setDOMContent(divElement)
     .addTo(map);
 
-  const onSubmit = (ev) => {
-    ev.preventDefault();
-    const newPoint = {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          inputLng.current.value,
-          inputLat.current.value,
-        ],
-      },
-      properties: {
-        title: inputTitle.current.value,
-        type: inputType.current.value,
-        category: inputCategory.current.value,
-        groupID: inputGroupID.current.value,
-      },
-    };
-
-    addPoint({
-      variables: {
-        point: JSON.stringify(newPoint),
-      },
-    });
-
+  const removePopup = () => {
     popup.remove();
   };
 
+  const PopupContent = () => {
+    const [fields, setFields] = useState({
+      title: '', type: '', category: '', groupID: '', lng: e.lngLat.lng, lat: e.lngLat.lat,
+    });
+
+    const onSubmit = (ev) => {
+      ev.preventDefault();
+      const newPoint = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            fields.lng,
+            fields.lat,
+          ],
+        },
+        properties: {
+          title: fields.title,
+          type: fields.type,
+          category: fields.category,
+          groupID: fields.groupID,
+        },
+      };
+
+      addPoint({
+        variables: {
+          point: JSON.stringify(newPoint),
+        },
+      });
+
+      popup.remove();
+    };
+
+    return (
+      <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
+        <div>Add a point</div>
+        <ValidatorForm onSubmit={onSubmit} autoComplete="off">
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. Point A"
+            id="title"
+            label="Title"
+            errorMessages={['this field is required']}
+            validators={['required']}
+            value={fields.title}
+            onChange={(x) => setFields({ ...fields, title: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. line"
+            id="type"
+            label="Type"
+            value={fields.type}
+            onChange={(x) => setFields({ ...fields, type: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder=""
+            id="groupid"
+            label="GroupID"
+            value={fields.groupID}
+            onChange={(x) => setFields({ ...fields, groupID: x.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. u-rack"
+            id="category"
+            label="Category"
+            value={fields.category}
+            onChange={(x) => setFields({ ...fields, category: x.target.value })}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="longitude"
+            label="Longitude"
+            value={fields.lng}
+            onChange={(x) => setFields({ ...fields, lng: x.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -180 to 180 required', 'number between -180 to 180 required']}
+            validators={['required', 'isFloat', 'minNumber:-180', 'maxNumber:180']}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="latitude"
+            label="Latitude"
+            value={fields.lat}
+            onChange={(x) => setFields({ ...fields, lat: x.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -90 to 90 required', 'number between -90 to 90 required']}
+            validators={['required', 'isFloat', 'minNumber:-90', 'maxNumber:90']}
+          />
+          <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
+        </ValidatorForm>
+      </div>
+    );
+  };
+
   ReactDOM.render(
-    <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
-      <div>Add a point</div>
-      <form onSubmit={onSubmit} noValidate autoComplete="off">
-        <TextField style={styleFormField} size="small" inputRef={inputTitle} placeholder="e.g. Point A" id="title" label="Title" />
-        <TextField style={styleFormField} size="small" inputRef={inputType} placeholder="e.g. line" id="type" label="Type" />
-        <TextField style={styleFormField} size="small" inputRef={inputGroupID} placeholder="" id="groupid" label="GroupID" />
-        <TextField style={styleFormField} size="small" inputRef={inputCategory} placeholder="e.g. u-rack" id="category" label="Category" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lng} size="small" inputRef={inputLng} id="longitude" label="Longitude" />
-        <TextField style={styleFormField} defaultValue={e.lngLat.lat} size="small" inputRef={inputLat} id="latitude" label="Latitude" />
-        <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
-      </form>
-    </div>,
-    content,
+    <PopupContent />,
+    divElement,
   );
 };
 
@@ -151,26 +204,29 @@ const handleLeftClick = ({
   }
 
   const feature = features[0];
-
-  const onClick = () => {
-    setSelectedFeatures([feature]);
-    setTab(1);
-  };
+  feature.id = feature.id.toString();
 
   const content = document.createElement('div');
-  ReactDOM.render(
-    <div>
-      <div>ID: {feature.id}</div>
-      <Button onClick={onClick}>more</Button>
-    </div>,
-    content,
-  );
 
   const popup = new mapboxgl.Popup()
     .setLngLat(feature.geometry.coordinates)
     // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
     .addTo(map);
+
+  const onClick = () => {
+    setSelectedFeatures([feature]);
+    popup.remove();
+    setTab(1);
+  };
+
+  ReactDOM.render(
+    <div>
+      <Typography variant="body2">{feature.properties.title ? feature.properties.title : `id: ${feature.id}`}</Typography>
+      <Button style={{ marginTop: Theme.spacing(1) }} color="primary" variant="contained" onClick={onClick}>more</Button>
+    </div>,
+    content,
+  );
 };
 
 const setupMap = ({
@@ -279,26 +335,14 @@ const setupMap = ({
 };
 
 const Map = ({
-  tab, setFeatures, setSelectedFeatures, setTab,
+  setMap, addPoint, tab, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
-  const [map, setMap] = useState(null);
 
   const mapContainer = useRef();
-
-  const {
-    loading: pointsLoading,
-    error: pointsError,
-    data: pointsData,
-  } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
-
-  const [addPoint] = useMutation(ADD_POINT, {
-    onError: handleError,
-    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
-  });
 
   useEffect(() => {
     setupMap({
@@ -306,7 +350,6 @@ const Map = ({
       setMap,
       setTab,
       setSelectedFeatures,
-      setFeatures,
       mapContainer,
       lng,
       lat,
@@ -316,20 +359,6 @@ const Map = ({
       setZoom,
     });
   }, []);
-
-  useEffect(() => {
-    const doIt = () => {
-      if (map && pointsData) {
-        const source = map.getSource('points');
-        if (source) {
-          const featuresData = JSON.parse(pointsData.allPoints).data;
-          map.getSource('points').setData(featuresData);
-          setFeatures(featuresData.features);
-        }
-      }
-    };
-    doIt();
-  }, [map, pointsData]);
 
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
