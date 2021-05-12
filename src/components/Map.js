@@ -61,15 +61,8 @@ const setupPopupAnchor = ({ mapContainer, e }) => {
 };
 
 const handleRightClick = ({
-  map, e, mapContainer, addPoint,
+  handleSnackbarMessage, map, e, mapContainer, addPoint,
 }) => {
-  const inputTitle = React.createRef();
-  const inputType = React.createRef();
-  const inputGroupID = React.createRef();
-  const inputCategory = React.createRef();
-  const inputLng = React.createRef();
-  const inputLat = React.createRef();
-
   const divElement = document.createElement('div');
 
   const styleFormField = { marginTop: 10 };
@@ -81,39 +74,27 @@ const handleRightClick = ({
     .setDOMContent(divElement)
     .addTo(map);
 
-  const removePopup = () => {
-    popup.remove();
-  };
-
   const PopupContent = () => {
     const [fields, setFields] = useState({
       title: '', type: '', category: '', groupID: '', lng: e.lngLat.lng, lat: e.lngLat.lat,
     });
 
-    const onSubmit = (ev) => {
+    const onSubmit = async (ev) => {
       ev.preventDefault();
-      const newPoint = {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [
-            fields.lng,
-            fields.lat,
-          ],
-        },
-        properties: {
-          title: fields.title,
-          type: fields.type,
-          category: fields.category,
-          groupID: fields.groupID,
-        },
-      };
-
-      addPoint({
+      const message = await addPoint({
         variables: {
-          point: JSON.stringify(newPoint),
+          title: fields.title,
+          category: fields.category,
+          type: fields.type,
+          groupID: fields.groupID,
+          lng: fields.lng,
+          lat: fields.lat,
         },
       });
+
+      if (message) {
+        handleSnackbarMessage({ severity: 'success', message: `${fields.title} added` });
+      }
 
       popup.remove();
     };
@@ -230,6 +211,7 @@ const handleLeftClick = ({
 };
 
 const setupMap = ({
+  handleSnackbarMessage,
   addPoint,
   setMap,
   setTab,
@@ -313,7 +295,7 @@ const setupMap = ({
 
   map.on('contextmenu', (e) => {
     handleRightClick({
-      map, e, mapContainer, addPoint,
+      handleSnackbarMessage, map, e, mapContainer, addPoint,
     });
   });
 
@@ -335,7 +317,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  setMap, addPoint, tab, setSelectedFeatures, setTab,
+  handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
@@ -346,6 +328,7 @@ const Map = ({
 
   useEffect(() => {
     setupMap({
+      handleSnackbarMessage,
       addPoint,
       setMap,
       setTab,

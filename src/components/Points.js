@@ -116,7 +116,7 @@ const Points = ({
         title: activeEdit.title,
         category: activeEdit.category,
         type: activeEdit.type,
-        groupid: activeEdit.groupID,
+        groupID: activeEdit.groupID,
         lng: activeEdit.longitude,
         lat: activeEdit.latitude,
       },
@@ -127,7 +127,8 @@ const Points = ({
     }
   };
 
-  const search = ({ searchTerm }) => {
+  const search = () => {
+    console.log('features: ', features);
     if (searchFieldValue === '') {
       if (features && features.length) {
         setSelectedFeatures(features.reduce((acc, cur) => {
@@ -150,7 +151,7 @@ const Points = ({
 
   const searchOnSubmit = (e) => {
     e.preventDefault();
-    search({ searchTerm: searchFieldValue });
+    search();
     setSearchFieldValue('');
     setActiveEdit(emptyActiveEdit);
   };

@@ -66,24 +66,30 @@ const DELETE_POINT = gql`mutation ($id: ID!){
   )
 }`;
 
-const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupid: String, $lng: Float, $lat: Float){
+const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
   editPoint(
     id: $id
     title: $title
     category: $category
     type: $type
-    groupid: $groupid
+    groupID: $groupID
     lng: $lng
     lat: $lat
   )
 }`;
 
-const ADD_POINT = gql`mutation ($point: String!){
+const ADD_POINT = gql`mutation ($title: String!, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
   addPoint(
-    point: $point
+    title: $title
+    category: $category
+    type: $type
+    groupID: $groupID
+    lng: $lng
+    lat: $lat
   ) 
 }`;
-const ALL_POINTS = gql`query{allPoints}`;
+
+const ALL_POINTS = gql`query{allPoints{id, title, category, type, groupID, lng, lat}}`;
 
 const App = () => {
   const [map, setMap] = useState(null);
@@ -134,9 +140,30 @@ const App = () => {
       if (map && pointsData) {
         const source = map.getSource('points');
         if (source) {
-          const featuresData = JSON.parse(pointsData.allPoints).data;
-          map.getSource('points').setData(featuresData);
-          setFeatures(featuresData.features);
+          console.log('pointsData: ', pointsData);
+          const points = {
+            type: 'FeatureCollection',
+            features: pointsData.allPoints.map((x) => ({
+              id: x.id,
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [
+                  x.lng,
+                  x.lat,
+                ],
+              },
+              properties: {
+                title: x.title,
+                category: x.category,
+                type: x.type,
+                groupID: x.groupID,
+              },
+            })),
+          };
+          console.log('points: ', points);
+          map.getSource('points').setData(points);
+          setFeatures(points.features);
         }
       }
     };
@@ -184,6 +211,7 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              handleSnackbarMessage={handleSnackbarMessage}
               addPoint={addPoint}
               navigation={navigation}
               setMap={setMap}

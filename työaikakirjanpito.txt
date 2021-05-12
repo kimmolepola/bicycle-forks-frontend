@@ -35,3 +35,5 @@ päivä		aika	kumul.	mitä tein
 10.5.		1:00	67:15	point edit
 11.5.		2:00	69:15	point delete
 			5:05	74:20	alert, form validation
+12.5.		1:10	75:20	gql definitions
+			4:00	79:20	mongoose
