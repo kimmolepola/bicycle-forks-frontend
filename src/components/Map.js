@@ -185,7 +185,7 @@ const handleLeftClick = ({
   }
 
   const feature = features[0];
-  feature.id = feature.id.toString();
+  console.log('feature: ', feature);
 
   const content = document.createElement('div');
 
@@ -203,7 +203,7 @@ const handleLeftClick = ({
 
   ReactDOM.render(
     <div>
-      <Typography variant="body2">{feature.properties.title ? feature.properties.title : `id: ${feature.id}`}</Typography>
+      <Typography variant="body2">{feature.properties.title}</Typography>
       <Button style={{ marginTop: Theme.spacing(1) }} color="primary" variant="contained" onClick={onClick}>more</Button>
     </div>,
     content,
@@ -248,7 +248,6 @@ const setupMap = ({
           tolerance: 0,
           data: {
             type: 'FeatureCollection',
-            previousFeatureId: 0,
             features: [
             ],
           },

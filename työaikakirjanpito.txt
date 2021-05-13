@@ -37,3 +37,4 @@ päivä		aika	kumul.	mitä tein
 			5:05	74:20	alert, form validation
 12.5.		1:10	75:20	gql definitions
 			4:00	79:20	mongoose
+13.5.		4:55	84:15	mongoose

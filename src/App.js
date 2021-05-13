@@ -60,15 +60,15 @@ const useStyles = makeStyles({
   },
 });
 
-const DELETE_POINT = gql`mutation ($id: ID!){
+const DELETE_POINT = gql`mutation ($databaseID: ID!){
   deletePoint(
-    id: $id
+    databaseID: $databaseID
   )
 }`;
 
-const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
+const EDIT_POINT = gql`mutation ($databaseID: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
   editPoint(
-    id: $id
+    databaseID: $databaseID
     title: $title
     category: $category
     type: $type
@@ -89,7 +89,7 @@ const ADD_POINT = gql`mutation ($title: String!, $category: String, $type: Strin
   ) 
 }`;
 
-const ALL_POINTS = gql`query{allPoints{id, title, category, type, groupID, lng, lat}}`;
+const ALL_POINTS = gql`query{allPoints{databaseID, mapboxFeatureID, title, category, type, groupID, lng, lat}}`;
 
 const App = () => {
   const [map, setMap] = useState(null);
@@ -135,6 +135,8 @@ const App = () => {
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
 
+  console.log('data: ', pointsData);
+
   useEffect(() => {
     const doIt = () => {
       if (map && pointsData) {
@@ -143,23 +145,25 @@ const App = () => {
           console.log('pointsData: ', pointsData);
           const points = {
             type: 'FeatureCollection',
-            features: pointsData.allPoints.map((x) => ({
-              id: x.id,
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [
-                  x.lng,
-                  x.lat,
-                ],
-              },
-              properties: {
-                title: x.title,
-                category: x.category,
-                type: x.type,
-                groupID: x.groupID,
-              },
-            })),
+            features: pointsData.allPoints.map((x) => (
+              {
+                id: x.mapboxFeatureID,
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [
+                    x.lng,
+                    x.lat,
+                  ],
+                },
+                properties: {
+                  databaseID: x.databaseID,
+                  title: x.title,
+                  category: x.category,
+                  type: x.type,
+                  groupID: x.groupID,
+                },
+              })),
           };
           console.log('points: ', points);
           map.getSource('points').setData(points);

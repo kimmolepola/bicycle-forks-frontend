@@ -45,7 +45,8 @@ const Points = ({
 }) => {
   const emptyActiveEdit = {
     delete: false,
-    id: '',
+    mapboxFeatureID: null,
+    databaseID: null,
     title: '',
     category: '',
     groupID: '',
@@ -56,16 +57,9 @@ const Points = ({
   const [searchFieldValue, setSearchFieldValue] = useState('');
   const [activeEdit, setActiveEdit] = useState(emptyActiveEdit);
 
-  const classes = useStyles();
+  console.log('active edit: ', activeEdit);
 
-  /*
-  useEffect(() => {
-    const doIt = () => {
-      setActiveEdit(emptyActiveEdit);
-    };
-    doIt();
-  }, [tab]);
-  */
+  const classes = useStyles();
 
   useEffect(() => {
     const doit = () => {
@@ -86,13 +80,14 @@ const Points = ({
   const handleEditClick = (feature) => {
     setActiveEdit({
       delete: false,
-      id: feature.id,
+      mapboxFeatureID: feature.id,
+      databaseID: feature.properties.databaseID,
       title: feature.properties.title ? feature.properties.title : '',
       category: feature.properties.category ? feature.properties.category : '',
       groupID: feature.properties.groupID ? feature.properties.groupID : '',
       type: feature.properties.type ? feature.properties.type : '',
-      longitude: feature.geometry.coordinates[0] ? feature.geometry.coordinates[0] : 0,
-      latitude: feature.geometry.coordinates[1] ? feature.geometry.coordinates[1] : 0,
+      longitude: feature.geometry.coordinates[0],
+      latitude: feature.geometry.coordinates[1],
     });
   };
 
@@ -101,7 +96,7 @@ const Points = ({
   };
 
   const handleDelete = async () => {
-    const deleteOperation = await deletePoint({ variables: { id: activeEdit.id } });
+    const deleteOperation = await deletePoint({ variables: { databaseID: activeEdit.databaseID } });
     if (deleteOperation) {
       handleSnackbarMessage({ severity: 'success', message: `${activeEdit.title} deleted` });
       setActiveEdit(emptyActiveEdit);
@@ -112,7 +107,7 @@ const Points = ({
     e.preventDefault();
     const editOperation = await editPoint({
       variables: {
-        id: activeEdit.id,
+        databaseID: activeEdit.databaseID,
         title: activeEdit.title,
         category: activeEdit.category,
         type: activeEdit.type,
@@ -198,9 +193,9 @@ const Points = ({
                 <div key={x.id + y.toString()}>
                   <Typography variant="h6" noWrap>{x.properties.title}</Typography>
                   <Typography color="textSecondary" variant="body2" noWrap>ID: {x.id}</Typography>
-                  <Typography variant="body2" noWrap>Category: {x.properties.category}</Typography>
-                  <Typography variant="body2" noWrap>Type: {x.properties.type}</Typography>
-                  <Typography variant="body2" noWrap>Group ID: {x.properties.groupID}</Typography>
+                  <Typography variant="body2" noWrap>{x.properties.category !== '' ? `Category: ${x.properties.category}` : null}</Typography>
+                  <Typography variant="body2" noWrap>{x.properties.type !== '' ? `Type: ${x.properties.type}` : null}</Typography>
+                  <Typography variant="body2" noWrap>{x.properties.groupID !== '' ? `Group ID: ${x.properties.groupID}` : null}</Typography>
                   <Typography variant="body2" noWrap>Longitude: {x.geometry.coordinates[0]}</Typography>
                   <Typography variant="body2" noWrap>Latitude: {x.geometry.coordinates[1]}</Typography>
                   <Button onClick={() => handleEditClick(x)} variant="outlined" size="small" style={{ marginTop: Theme.spacing(1) }}>Edit</Button>
@@ -211,11 +206,11 @@ const Points = ({
           </Card>
         </div>
 
-        <div style={{ display: activeEdit.id !== '' ? '' : 'none', flex: 1 }}>
+        <div style={{ display: activeEdit.mapboxFeatureID ? '' : 'none', flex: 1 }}>
           <Card style={{ padding: 10 }}>
             <ValidatorForm onSubmit={editOnSubmit} className={classes.form} autoComplete="off">
               <Typography variant="h6" noWrap>Edit</Typography>
-              <Typography variant="body2" noWrap>Point ID: {activeEdit.id}</Typography>
+              <Typography variant="body2" noWrap>Point ID: {activeEdit.mapboxFeatureID}</Typography>
               <TextValidator
                 errorMessages={['this field is required']}
                 validators={['required']}
