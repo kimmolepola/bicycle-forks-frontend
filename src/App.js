@@ -60,15 +60,15 @@ const useStyles = makeStyles({
   },
 });
 
-const DELETE_POINT = gql`mutation ($databaseID: ID!){
+const DELETE_POINT = gql`mutation ($id: ID!){
   deletePoint(
-    databaseID: $databaseID
+    id: $id
   )
 }`;
 
-const EDIT_POINT = gql`mutation ($databaseID: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
+const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
   editPoint(
-    databaseID: $databaseID
+    id: $id
     title: $title
     category: $category
     type: $type
@@ -89,7 +89,7 @@ const ADD_POINT = gql`mutation ($title: String!, $category: String, $type: Strin
   ) 
 }`;
 
-const ALL_POINTS = gql`query{allPoints{databaseID, mapboxFeatureID, title, category, type, groupID, lng, lat}}`;
+const ALL_POINTS = gql`query{allPoints{id, mapboxFeatureID, title, category, type, groupID, lng, lat}}`;
 
 const App = () => {
   const [map, setMap] = useState(null);
@@ -135,14 +135,12 @@ const App = () => {
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
 
-  console.log('data: ', pointsData);
-
   useEffect(() => {
+    /*
     const doIt = () => {
       if (map && pointsData) {
         const source = map.getSource('points');
         if (source) {
-          console.log('pointsData: ', pointsData);
           const points = {
             type: 'FeatureCollection',
             features: pointsData.allPoints.map((x) => (
@@ -150,14 +148,15 @@ const App = () => {
                 id: x.mapboxFeatureID,
                 type: 'Feature',
                 geometry: {
-                  type: 'Point',
+                  type: 'Polygon',
                   coordinates: [
-                    x.lng,
-                    x.lat,
+                    [x.lng, x.lat],
+                    [x.lng + 0.01, x.lat],
+                    [x.lng, x.lat + 0.01],
                   ],
                 },
                 properties: {
-                  databaseID: x.databaseID,
+                  databaseID: x.id,
                   title: x.title,
                   category: x.category,
                   type: x.type,
@@ -165,13 +164,14 @@ const App = () => {
                 },
               })),
           };
-          console.log('points: ', points);
           map.getSource('points').setData(points);
           setFeatures(points.features);
+          console.log('set features: ', points.features);
         }
       }
     };
     doIt();
+    */
   }, [map, pointsData]);
 
   const handleDrawerToggle = () => {

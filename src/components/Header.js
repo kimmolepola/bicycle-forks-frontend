@@ -51,23 +51,6 @@ const Header = ({ onDrawerToggle, tab, setTab }) => {
               </Grid>
             </Hidden>
             <Grid item xs />
-            <Grid item>
-              <Link className={classes.link} href="www.github.com" variant="body2">
-                Go to docs
-              </Link>
-            </Grid>
-            <Grid item>
-              <Tooltip title="Alerts • No alerts">
-                <IconButton color="inherit">
-                  <NotificationsIcon />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-            <Grid item>
-              <IconButton color="inherit" className={classes.iconButtonAvatar}>
-                <Avatar src="/static/images/avatar/1.jpg" alt="My Avatar" />
-              </IconButton>
-            </Grid>
           </Grid>
         </Toolbar>
       </AppBar>
@@ -84,18 +67,6 @@ const Header = ({ onDrawerToggle, tab, setTab }) => {
               <Typography color="inherit" variant="h5" component="h1">
                 Bike Stands
               </Typography>
-            </Grid>
-            <Grid item>
-              <Button className={classes.button} variant="outlined" color="inherit" size="small">
-                Web setup
-              </Button>
-            </Grid>
-            <Grid item>
-              <Tooltip title="Help">
-                <IconButton color="inherit">
-                  <HelpIcon />
-                </IconButton>
-              </Tooltip>
             </Grid>
           </Grid>
         </Toolbar>

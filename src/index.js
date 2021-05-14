@@ -8,7 +8,19 @@ import reportWebVitals from './reportWebVitals';
 
 const client = new ApolloClient({
   uri: process.env.REACT_APP_BACKEND,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          allPoints: {
+            merge(existing = [], incoming) {
+              return [...existing, ...incoming];
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 ReactDOM.render(

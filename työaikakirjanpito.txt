@@ -38,3 +38,5 @@ päivä		aika	kumul.	mitä tein
 12.5.		1:10	75:20	gql definitions
 			4:00	79:20	mongoose
 13.5.		4:55	84:15	mongoose
+14.5.		0:30	84:45	read about mapbox-gl layer type
+			1:00	85:45	layer type fill

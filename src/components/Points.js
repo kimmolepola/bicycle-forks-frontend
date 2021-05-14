@@ -57,8 +57,6 @@ const Points = ({
   const [searchFieldValue, setSearchFieldValue] = useState('');
   const [activeEdit, setActiveEdit] = useState(emptyActiveEdit);
 
-  console.log('active edit: ', activeEdit);
-
   const classes = useStyles();
 
   useEffect(() => {
@@ -96,7 +94,7 @@ const Points = ({
   };
 
   const handleDelete = async () => {
-    const deleteOperation = await deletePoint({ variables: { databaseID: activeEdit.databaseID } });
+    const deleteOperation = await deletePoint({ variables: { id: activeEdit.databaseID } });
     if (deleteOperation) {
       handleSnackbarMessage({ severity: 'success', message: `${activeEdit.title} deleted` });
       setActiveEdit(emptyActiveEdit);
@@ -107,7 +105,7 @@ const Points = ({
     e.preventDefault();
     const editOperation = await editPoint({
       variables: {
-        databaseID: activeEdit.databaseID,
+        id: activeEdit.databaseID,
         title: activeEdit.title,
         category: activeEdit.category,
         type: activeEdit.type,
@@ -123,7 +121,6 @@ const Points = ({
   };
 
   const search = () => {
-    console.log('features: ', features);
     if (searchFieldValue === '') {
       if (features && features.length) {
         setSelectedFeatures(features.reduce((acc, cur) => {

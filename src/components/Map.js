@@ -185,7 +185,6 @@ const handleLeftClick = ({
   }
 
   const feature = features[0];
-  console.log('feature: ', feature);
 
   const content = document.createElement('div');
 
@@ -236,6 +235,40 @@ const setupMap = ({
   });
 
   map.on('load', () => {
+    // Add a data source containing GeoJSON data.
+    map.addSource('points', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          // These coordinates outline Maine.
+          coordinates: [[
+            [24.9454, 60.1755],
+            [24.9554, 60.1755],
+            [24.9554, 60.1655],
+            [24.9454, 60.1655],
+            [24.9454, 60.1755],
+          ]],
+        },
+      },
+    });
+
+    // Add a new layer to visualize the polygon.
+    map.addLayer({
+      id: 'points',
+      type: 'fill',
+      source: 'points', // reference the data source
+      layout: {},
+      paint: {
+        'fill-color': '#0080ff', // blue color fill
+        'fill-opacity': 0.5,
+      },
+    });
+    setMap(map);
+  });
+  /*
+  map.on('load', () => {
     // Add an image to use as a custom marker
     map.loadImage(
       'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
@@ -281,7 +314,7 @@ const setupMap = ({
       },
     );
   });
-
+*/
   // Change the cursor to a pointer when the mouse is over the places layer.
   map.on('mouseenter', 'points', () => {
     map.getCanvas().style.cursor = 'pointer';
