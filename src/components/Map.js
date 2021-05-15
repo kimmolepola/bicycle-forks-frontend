@@ -61,8 +61,12 @@ const setupPopupAnchor = ({ mapContainer, e }) => {
 };
 
 const handleRightClick = ({
-  handleSnackbarMessage, map, e, mapContainer, addPoint,
+  fillCoors, handleSnackbarMessage, map, e, mapContainer, addPoint,
 }) => {
+  fillCoors.current.push([e.lngLat.lng, e.lngLat.lat]);
+  console.log('fillCoors: ', fillCoors);
+
+  /*
   const divElement = document.createElement('div');
 
   const styleFormField = { marginTop: 10 };
@@ -171,13 +175,14 @@ const handleRightClick = ({
     <PopupContent />,
     divElement,
   );
+  */
 };
 
 const handleLeftClick = ({
   map, e, setSelectedFeatures, setTab,
 }) => {
   const features = map.queryRenderedFeatures(e.point, {
-    layers: ['points'], // replace this with the name of the layer
+    layers: ['fills'], // replace this with the name of the layer
   });
 
   if (!features.length) {
@@ -210,6 +215,7 @@ const handleLeftClick = ({
 };
 
 const setupMap = ({
+  fillCoors,
   handleSnackbarMessage,
   addPoint,
   setMap,
@@ -236,8 +242,9 @@ const setupMap = ({
 
   map.on('load', () => {
     // Add a data source containing GeoJSON data.
-    map.addSource('points', {
+    map.addSource('fills', {
       type: 'geojson',
+      tolerance: 0,
       data: {
         type: 'Feature',
         geometry: {
@@ -256,13 +263,48 @@ const setupMap = ({
 
     // Add a new layer to visualize the polygon.
     map.addLayer({
-      id: 'points',
+      id: 'fills',
       type: 'fill',
-      source: 'points', // reference the data source
+      source: 'fills', // reference the data source
       layout: {},
       paint: {
         'fill-color': '#0080ff', // blue color fill
         'fill-opacity': 0.5,
+      },
+    });
+
+    map.addSource('fillDrawPoints', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            id: 11,
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [24.9454, 60.1745],
+            },
+          },
+          {
+            id: 12,
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [24.9464, 60.1745],
+            },
+          },
+        ],
+      },
+    });
+
+    map.addLayer({
+      id: 'fillDrawPoints',
+      type: 'circle',
+      source: 'fillDrawPoints',
+      layout: {},
+      paint: {
+        'circle-color': '#ffffff',
       },
     });
     setMap(map);
@@ -316,18 +358,18 @@ const setupMap = ({
   });
 */
   // Change the cursor to a pointer when the mouse is over the places layer.
-  map.on('mouseenter', 'points', () => {
+  map.on('mouseenter', 'fills', () => {
     map.getCanvas().style.cursor = 'pointer';
   });
 
   // Change it back to a pointer when it leaves.
-  map.on('mouseleave', 'points', () => {
+  map.on('mouseleave', 'fills', () => {
     map.getCanvas().style.cursor = '';
   });
 
   map.on('contextmenu', (e) => {
     handleRightClick({
-      handleSnackbarMessage, map, e, mapContainer, addPoint,
+      fillCoors, handleSnackbarMessage, map, e, mapContainer, addPoint,
     });
   });
 
@@ -349,7 +391,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
+  map, handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
@@ -357,9 +399,37 @@ const Map = ({
   const [zoom, setZoom] = useState(13.76);
 
   const mapContainer = useRef();
+  const fillCoors = useRef([]);
+
+  useEffect(() => {
+    const doIt = () => {
+      if (map) {
+        const source = map.getSource('fillDrawPoints');
+        const points = {
+          type: 'FeatureCollection',
+          features: fillCoors.current.map((x, y) => (
+            {
+              id: y,
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [x[0], x[1]],
+              },
+            })),
+        };
+        source.setData(points);
+      }
+    };
+    doIt();
+  }, [fillCoors.current]);
+
+  if (map) {
+    console.log('fillDrawPoints: ', map.getSource('fillDrawPoints')._data); // eslint-disable-line
+  }
 
   useEffect(() => {
     setupMap({
+      fillCoors,
       handleSnackbarMessage,
       addPoint,
       setMap,

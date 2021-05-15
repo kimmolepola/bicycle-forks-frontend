@@ -215,6 +215,7 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              map={map}
               handleSnackbarMessage={handleSnackbarMessage}
               addPoint={addPoint}
               navigation={navigation}
