@@ -42,3 +42,4 @@ päivä		aika	kumul.	mitä tein
 			1:00	85:45	layer type fill
 15.5.		2:00	87:45	fill layer
 16.5.		2:10	89:55	fill layer
+			2:00	91:55	MapboxDraw

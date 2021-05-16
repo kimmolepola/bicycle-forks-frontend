@@ -8,7 +8,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import ReactDOM from 'react-dom';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import Theme from '../Theme';
+import './mapbox-gl-draw.css';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -239,6 +241,31 @@ const setupMap = ({
     zoom,
   });
 
+  /*
+  const Draw = new MapboxDraw();
+
+  // Map#addControl takes an optional second argument to set the position of the control.
+  // If no position is specified the control defaults to `top-right`. See the docs
+  // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
+
+  map.addControl(Draw, 'top-left');
+  */
+
+  const draw = new MapboxDraw({
+    displayControlsDefault: false,
+    controls: {
+      polygon: true,
+      trash: true,
+    },
+    // defaultMode: 'draw_polygon',
+  });
+  map.addControl(draw);
+  map.addControl(new mapboxgl.NavigationControl());
+
+  map.on('draw.create', (x) => console.log('create: ', x));
+  map.on('draw.delete', (x) => console.log('delete: ', x));
+  map.on('draw.update', (x) => console.log('update: ', x));
+
   map.on('load', () => {
     // Add a data source containing GeoJSON data.
     map.addSource('fills', {
@@ -306,6 +333,7 @@ const setupMap = ({
         'circle-color': '#ffffff',
       },
     });
+
     setMap(map);
   });
   /*
@@ -383,20 +411,6 @@ const setupMap = ({
     setLat(map.getCenter().lat.toFixed(4));
     setZoom(map.getZoom().toFixed(2));
   });
-
-  const draw = new MapboxDraw({
-    displayControlsDefault: false,
-    controls: {
-      polygon: true,
-      trash: true,
-    },
-    defaultMode: 'draw_polygon',
-  });
-  map.addControl(draw);
-
-  map.on('draw.create', updateArea);
-  map.on('draw.delete', updateArea);
-  map.on('draw.update', updateArea);
 
   return () => {
     map.remove();
