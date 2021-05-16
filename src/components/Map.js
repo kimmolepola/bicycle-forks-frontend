@@ -61,10 +61,9 @@ const setupPopupAnchor = ({ mapContainer, e }) => {
 };
 
 const handleRightClick = ({
-  fillCoors, handleSnackbarMessage, map, e, mapContainer, addPoint,
+  setFillCoorsNewPoint, handleSnackbarMessage, map, e, mapContainer, addPoint,
 }) => {
-  fillCoors.current.push([e.lngLat.lng, e.lngLat.lat]);
-  console.log('fillCoors: ', fillCoors);
+  setFillCoorsNewPoint([e.lngLat.lng, e.lngLat.lat]);
 
   /*
   const divElement = document.createElement('div');
@@ -215,7 +214,7 @@ const handleLeftClick = ({
 };
 
 const setupMap = ({
-  fillCoors,
+  setFillCoorsNewPoint,
   handleSnackbarMessage,
   addPoint,
   setMap,
@@ -273,7 +272,7 @@ const setupMap = ({
       },
     });
 
-    map.addSource('fillDrawPoints', {
+    map.addSource('newFillPoints', {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
@@ -299,9 +298,9 @@ const setupMap = ({
     });
 
     map.addLayer({
-      id: 'fillDrawPoints',
+      id: 'newFillPoints',
       type: 'circle',
-      source: 'fillDrawPoints',
+      source: 'newFillPoints',
       layout: {},
       paint: {
         'circle-color': '#ffffff',
@@ -369,7 +368,7 @@ const setupMap = ({
 
   map.on('contextmenu', (e) => {
     handleRightClick({
-      fillCoors, handleSnackbarMessage, map, e, mapContainer, addPoint,
+      setFillCoorsNewPoint, handleSnackbarMessage, map, e, mapContainer, addPoint,
     });
   });
 
@@ -385,6 +384,20 @@ const setupMap = ({
     setZoom(map.getZoom().toFixed(2));
   });
 
+  const draw = new MapboxDraw({
+    displayControlsDefault: false,
+    controls: {
+      polygon: true,
+      trash: true,
+    },
+    defaultMode: 'draw_polygon',
+  });
+  map.addControl(draw);
+
+  map.on('draw.create', updateArea);
+  map.on('draw.delete', updateArea);
+  map.on('draw.update', updateArea);
+
   return () => {
     map.remove();
   };
@@ -397,39 +410,77 @@ const Map = ({
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
+  const [fillCoors, setFillCoors] = useState([]);
+  const [fillCoorsNewPoint, setFillCoorsNewPoint] = useState([]);
 
   const mapContainer = useRef();
-  const fillCoors = useRef([]);
 
+  /*
   useEffect(() => {
     const doIt = () => {
-      if (map) {
-        const source = map.getSource('fillDrawPoints');
-        const points = {
-          type: 'FeatureCollection',
-          features: fillCoors.current.map((x, y) => (
-            {
-              id: y,
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [x[0], x[1]],
-              },
-            })),
-        };
-        source.setData(points);
+      if (fillCoorsNewPoint.length) {
+        const currentFillCoors = [...fillCoors];
+        if (!currentFillCoors.length) {
+          currentFillCoors.push([fillCoorsNewPoint]);
+        } else if (currentFillCoors[currentFillCoors.length - 1].length < 4) {
+          currentFillCoors[currentFillCoors.length - 1].push(fillCoorsNewPoint);
+        } else {
+          currentFillCoors.push([fillCoorsNewPoint]);
+        }
+        setFillCoors(currentFillCoors);
+        console.log('currentFillCoors: ', currentFillCoors);
+        if (map) {
+          const newFillPointsSource = map.getSource('newFillPoints');
+          let features = [];
+          if (currentFillCoors[currentFillCoors.length - 1].length < 4) {
+            features = currentFillCoors[currentFillCoors.length - 1].map((x, y) => (
+              {
+                id: y,
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [x[0], x[1]],
+                },
+              }
+            ));
+          }
+          console.log('features: ', features);
+          const points = {
+            type: 'FeatureCollection',
+            features,
+          };
+          newFillPointsSource.setData(points);
+
+          const fillsSource = map.getSource('fills');
+          console.log('last: ', currentFillCoors.slice(-1));
+          let coordinates = [];
+          if (currentFillCoors.length === 1) {
+            coordinates = currentFillCoors[0].length > 2
+              ? currentFillCoors : [];
+          } else {
+            coordinates = currentFillCoors.slice(-1)[0].length > 2
+              ? currentFillCoors
+              : currentFillCoors.slice(0, -1);
+          }
+          console.log('coordinates: ', coordinates);
+          const fills = {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates,
+            },
+          };
+          fillsSource.setData(fills);
+        }
       }
     };
     doIt();
-  }, [fillCoors.current]);
-
-  if (map) {
-    console.log('fillDrawPoints: ', map.getSource('fillDrawPoints')._data); // eslint-disable-line
-  }
+  }, [fillCoorsNewPoint]);
+*/
 
   useEffect(() => {
     setupMap({
-      fillCoors,
+      setFillCoorsNewPoint,
       handleSnackbarMessage,
       addPoint,
       setMap,
