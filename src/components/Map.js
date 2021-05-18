@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import ReactDOM from 'react-dom';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import Theme from '../Theme';
 import './mapbox-gl-draw.css';
 
@@ -251,14 +252,26 @@ const setupMap = ({
   map.addControl(Draw, 'top-left');
   */
 
+  console.log(defaultMapboxDrawStyles);
+
   const draw = new MapboxDraw({
     displayControlsDefault: false,
     controls: {
       polygon: true,
       trash: true,
     },
-    // defaultMode: 'draw_polygon',
+    styles: defaultMapboxDrawStyles.map((x) => {
+      switch (x.id) {
+        case 'gl-draw-polygon-fill-inactive':
+          return { ...x, paint: { ...x.paint, 'fill-opacity': 0.5, 'fill-color': '#0080ff' } };
+        case 'gl-draw-polygon-stroke-inactive':
+          return { ...x, filter: [] };
+        default:
+          return x;
+      }
+    }),
   });
+
   map.addControl(draw);
   map.addControl(new mapboxgl.NavigationControl());
 
@@ -429,6 +442,24 @@ const Map = ({
 
   const mapContainer = useRef();
 
+  if (map) {
+    console.log(map.getStyle());
+  }
+
+  /*
+  if (map) {
+    try {
+      console.log(map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties);
+      map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties = { // eslint-disable-line
+        id: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.id,
+        active: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.active,
+        mode: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.mode,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  */
   /*
   useEffect(() => {
     const doIt = () => {
