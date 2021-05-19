@@ -44,3 +44,4 @@ päivä		aika	kumul.	mitä tein
 16.5.		2:10	89:55	fill layer
 			2:00	91:55	MapboxDraw
 18:5.		3:10	95:05	MapboxDraw
+19.5.		7:15	102:20	MapboxDraw, graphql, CSS

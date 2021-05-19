@@ -70,7 +70,7 @@ const Navigator = ({ navigation, setNavigation, ...other }) => {
 
   const categories = [
     {
-      id: 'User',
+      id: 'Admin',
       children: [
         { id: 'App', icon: <DirectionsBikeIcon /> }],
     },

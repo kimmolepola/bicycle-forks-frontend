@@ -1,3 +1,7 @@
+.mapbox-gl-draw_ctrl-draw-btn.mapbox-gl-draw_polygon.active,
+.mapbox-gl-draw_ctrl-draw-btn.mapbox-gl-draw_polygon.active:hover{
+  background-color:#63ccff;
+}
 
 /* Override default control style */
 .mapbox-gl-draw_ctrl-bottom-left,

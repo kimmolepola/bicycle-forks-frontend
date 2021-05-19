@@ -65,7 +65,7 @@ const Header = ({ onDrawerToggle, tab, setTab }) => {
           <Grid container alignItems="center" spacing={1}>
             <Grid item xs>
               <Typography color="inherit" variant="h5" component="h1">
-                Bike Stands
+                Low-risk areas
               </Typography>
             </Grid>
           </Grid>

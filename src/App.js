@@ -6,6 +6,7 @@ import {
 import { Alert } from '@material-ui/lab';
 import {
   useMutation, useQuery, gql,
+  useLazyQuery,
 } from '@apollo/client';
 
 import Navigator from './components/Navigator';
@@ -60,6 +61,18 @@ const useStyles = makeStyles({
   },
 });
 
+const ADD_FILL = gql`mutation ($id: ID!, $title: String!, $category: String, $type: String, $coordinates: [[Float!]!]!){
+  addFill(
+    id: $id
+    title: $title
+    category: $category
+    type: $type
+    coordinates: $coordinates    
+  )
+}`;
+
+const ALL_FILLS = gql`query{allFills{id, title, category, type, coordinates}}`;
+
 const DELETE_POINT = gql`mutation ($id: ID!){
   deletePoint(
     id: $id
@@ -101,6 +114,7 @@ const App = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarTransition] = useState(() => function slide(props) { return <Slide {...props} direction="left" />; });
   const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'info' });
+  const [draw, setDraw] = useState(null);
 
   const classes = useStyles();
 
@@ -113,6 +127,19 @@ const App = () => {
     handleSnackbarMessage({ severity: 'error', message: error.message });
     console.error(error);
   };
+
+  const [getFills, { loading, data: fillsLazyQueryData }] = useLazyQuery(ALL_FILLS, { fetchPolicy: 'network-only' });
+
+  const [addFill] = useMutation(ADD_FILL, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_FILLS, notifyOnNetworkStatusChange: true }],
+  });
+
+  const {
+    loading: fillsLoading,
+    error: fillsError,
+    data: fillsData,
+  } = useQuery(ALL_FILLS, { fetchPolicy: 'network-only' });
 
   const [deletePoint] = useMutation(DELETE_POINT, {
     onError: handleError,
@@ -134,6 +161,55 @@ const App = () => {
     error: pointsError,
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
+
+  /*
+  useEffect(() => {
+    const doit = () => {
+      if (draw && fillsData) {
+        console.log(fillsData);
+      }
+    };
+    doit();
+  }, [fillsData]);
+*/
+
+  useEffect(() => {
+    const doit = () => {
+      console.log('fillsData: ', fillsData);
+      if (draw && fillsData) {
+        // const source = map.getSource('mapbox-gl-draw-cold');
+        // if (source) {
+        const fills = {
+          type: 'FeatureCollection',
+          features: fillsData.allFills.map((x) => (
+            {
+              id: x.id,
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: [x.coordinates],
+              },
+              properties: {
+                title: x.title,
+              },
+            })),
+        };
+        console.log('fills draw set: ', fills);
+        draw.set(fills);
+        // map.getSource(source).setData(fills);
+        // }
+      }
+    };
+    doit();
+  }, [fillsData, draw]);
+
+  /*
+                active: 'true',
+                id: x.id,
+                meta: 'feature',
+                'meta:type': 'Polygon',
+                mode: 'simple_select',
+*/
 
   useEffect(() => {
     /*
@@ -215,6 +291,9 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              setDraw={setDraw}
+              getFills={getFills}
+              addFill={addFill}
               map={map}
               handleSnackbarMessage={handleSnackbarMessage}
               addPoint={addPoint}

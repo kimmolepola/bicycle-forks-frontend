@@ -181,10 +181,10 @@ const handleRightClick = ({
 };
 
 const handleLeftClick = ({
-  map, e, setSelectedFeatures, setTab,
+  map, e, setSelectedFeatures, setTab, mapContainer,
 }) => {
   const features = map.queryRenderedFeatures(e.point, {
-    layers: ['fills'], // replace this with the name of the layer
+    layers: ['gl-draw-polygon-fill-inactive.cold'], // replace this with the name of the layer
   });
 
   if (!features.length) {
@@ -193,10 +193,14 @@ const handleLeftClick = ({
 
   const feature = features[0];
 
+  console.log('click feature: ', feature);
+  console.log('point: ', e);
   const content = document.createElement('div');
 
-  const popup = new mapboxgl.Popup()
-    .setLngLat(feature.geometry.coordinates)
+  const popup = new mapboxgl.Popup({
+    anchor: setupPopupAnchor({ mapContainer, e }),
+  })
+    .setLngLat([e.lngLat.lng, e.lngLat.lat])
     // .setHTML(`<h3>${feature.properties.type}</h3>`)
     .setDOMContent(content)
     .addTo(map);
@@ -209,7 +213,7 @@ const handleLeftClick = ({
 
   ReactDOM.render(
     <div>
-      <Typography variant="body2">{feature.properties.title}</Typography>
+      <Typography variant="body2">{feature.properties.user_title}</Typography>
       <Button style={{ marginTop: Theme.spacing(1) }} color="primary" variant="contained" onClick={onClick}>more</Button>
     </div>,
     content,
@@ -217,6 +221,9 @@ const handleLeftClick = ({
 };
 
 const setupMap = ({
+  setDraw,
+  getFills,
+  addFill,
   setFillCoorsNewPoint,
   handleSnackbarMessage,
   addPoint,
@@ -235,6 +242,7 @@ const setupMap = ({
   mapboxgl.accessToken = process.env.REACT_APP_MAPBOXGL_ACCESSTOKEN;
 
   const map = new mapboxgl.Map({
+    attributionControl: false,
     container: mapContainer.current,
     // style: 'mapbox://styles/mapbox/streets-v11',
     style: process.env.REACT_APP_MAPPBOX_STYLE,
@@ -255,6 +263,7 @@ const setupMap = ({
   console.log(defaultMapboxDrawStyles);
 
   const draw = new MapboxDraw({
+    userProperties: true,
     displayControlsDefault: false,
     controls: {
       polygon: true,
@@ -265,21 +274,42 @@ const setupMap = ({
         case 'gl-draw-polygon-fill-inactive':
           return { ...x, paint: { ...x.paint, 'fill-opacity': 0.5, 'fill-color': '#0080ff' } };
         case 'gl-draw-polygon-stroke-inactive':
-          return { ...x, filter: [] };
+          return { ...x, filter: ['all', false] };
         default:
           return x;
       }
     }),
   });
 
-  map.addControl(draw);
-  map.addControl(new mapboxgl.NavigationControl());
-
-  map.on('draw.create', (x) => console.log('create: ', x));
+  map.on('draw.create', (x) => {
+    console.log('create: ', x);
+    addFill({ variables: { id: x.features[0].id, title: `title_${x.features[0].id}`, coordinates: x.features[0].geometry.coordinates[0] } });
+  });
   map.on('draw.delete', (x) => console.log('delete: ', x));
   map.on('draw.update', (x) => console.log('update: ', x));
 
   map.on('load', () => {
+    map.addControl(draw);
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true,
+      },
+      trackUserLocation: true,
+    }));
+    map.addControl(new mapboxgl.AttributionControl({
+      compact: true,
+    }));
+    const scale = new mapboxgl.ScaleControl({
+      maxWidth: 80,
+      unit: 'imperial',
+    });
+    map.addControl(scale);
+    scale.setUnit('metric');
+
+    getFills();
+    setDraw(draw);
+
     // Add a data source containing GeoJSON data.
     map.addSource('fills', {
       type: 'geojson',
@@ -415,7 +445,7 @@ const setupMap = ({
 
   map.on('click', (e) => {
     handleLeftClick({
-      map, setSelectedFeatures, setTab, e,
+      map, setSelectedFeatures, setTab, e, mapContainer,
     });
   });
 
@@ -431,7 +461,7 @@ const setupMap = ({
 };
 
 const Map = ({
-  map, handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
+  setDraw, getFills, addFill, map, handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
@@ -525,6 +555,9 @@ const Map = ({
 
   useEffect(() => {
     setupMap({
+      setDraw,
+      getFills,
+      addFill,
       setFillCoorsNewPoint,
       handleSnackbarMessage,
       addPoint,
