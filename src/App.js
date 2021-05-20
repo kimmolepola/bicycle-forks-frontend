@@ -17,17 +17,6 @@ import Points from './components/Points';
 
 const drawerWidth = 256;
 
-const Copyright = () => (
-  <Typography variant="body2" color="textSecondary" align="center">
-    {'Copyright © '}
-    <Link color="inherit" href="https://material-ui.com/">
-      Your Website
-    </Link>{' '}
-    {new Date().getFullYear()}
-    {'.'}
-  </Typography>
-);
-
 const useStyles = makeStyles({
   root: {
     display: 'flex',
@@ -47,9 +36,7 @@ const useStyles = makeStyles({
   main: {
     display: 'flex',
     flex: 1,
-    paddingTop: Theme.spacing(6),
-    paddingLeft: Theme.spacing(4),
-    paddingRight: Theme.spacing(4),
+    padding: Theme.spacing(4),
     background: '#eaeff1',
   },
   footer: {
@@ -162,23 +149,10 @@ const App = () => {
     data: pointsData,
   } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
 
-  /*
-  useEffect(() => {
-    const doit = () => {
-      if (draw && fillsData) {
-        console.log(fillsData);
-      }
-    };
-    doit();
-  }, [fillsData]);
-*/
-
   useEffect(() => {
     const doit = () => {
       console.log('fillsData: ', fillsData);
       if (draw && fillsData) {
-        // const source = map.getSource('mapbox-gl-draw-cold');
-        // if (source) {
         const fills = {
           type: 'FeatureCollection',
           features: fillsData.allFills.map((x) => (
@@ -196,59 +170,10 @@ const App = () => {
         };
         console.log('fills draw set: ', fills);
         draw.set(fills);
-        // map.getSource(source).setData(fills);
-        // }
       }
     };
     doit();
   }, [fillsData, draw]);
-
-  /*
-                active: 'true',
-                id: x.id,
-                meta: 'feature',
-                'meta:type': 'Polygon',
-                mode: 'simple_select',
-*/
-
-  useEffect(() => {
-    /*
-    const doIt = () => {
-      if (map && pointsData) {
-        const source = map.getSource('points');
-        if (source) {
-          const points = {
-            type: 'FeatureCollection',
-            features: pointsData.allPoints.map((x) => (
-              {
-                id: x.mapboxFeatureID,
-                type: 'Feature',
-                geometry: {
-                  type: 'Polygon',
-                  coordinates: [
-                    [x.lng, x.lat],
-                    [x.lng + 0.01, x.lat],
-                    [x.lng, x.lat + 0.01],
-                  ],
-                },
-                properties: {
-                  databaseID: x.id,
-                  title: x.title,
-                  category: x.category,
-                  type: x.type,
-                  groupID: x.groupID,
-                },
-              })),
-          };
-          map.getSource('points').setData(points);
-          setFeatures(points.features);
-          console.log('set features: ', points.features);
-        }
-      }
-    };
-    doIt();
-    */
-  }, [map, pointsData]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -291,18 +216,13 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              draw={draw}
               setDraw={setDraw}
               getFills={getFills}
               addFill={addFill}
               map={map}
-              handleSnackbarMessage={handleSnackbarMessage}
-              addPoint={addPoint}
-              navigation={navigation}
               setMap={setMap}
               tab={tab}
-              setTab={setTab}
-              setFeatures={setFeatures}
-              setSelectedFeatures={setSelectedFeatures}
             />
             <Points
               handleSnackbarMessage={handleSnackbarMessage}
@@ -314,9 +234,6 @@ const App = () => {
               setSelectedFeatures={setSelectedFeatures}
             />
           </main>
-          <footer className={classes.footer}>
-            <Copyright />
-          </footer>
         </div>
       </div>
     </ThemeProvider>

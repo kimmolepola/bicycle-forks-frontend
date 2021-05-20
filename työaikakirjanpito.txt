@@ -45,3 +45,4 @@ päivä		aika	kumul.	mitä tein
 			2:00	91:55	MapboxDraw
 18:5.		3:10	95:05	MapboxDraw
 19.5.		7:15	102:20	MapboxDraw, graphql, CSS
+20.5.		3:00	105:20	cleanup, design, MapboxDraw popup

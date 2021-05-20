@@ -1,16 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {
+  useRef, useEffect, useState,
+} from 'react';
+import ReactDOM from 'react-dom';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Button, TextField, Typography,
+  Box, Button,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import ReactDOM from 'react-dom';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
-import Theme from '../Theme';
 import './mapbox-gl-draw.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -38,198 +38,25 @@ const useStyles = makeStyles((theme) => ({
     margin: '12px',
     borderRadius: '4px',
   },
+  featureForm: {
+    position: 'absolute',
+    backgroundColor: 'rgba(35, 55, 75, 0.9)',
+    color: '#ffffff',
+    padding: '6px 12px',
+    font: '15px/24px monospace',
+    zIndex: 1,
+    bottom: 0,
+    margin: '100px',
+    borderRadius: '4px',
+  },
 }));
 
-const setupPopupAnchor = ({ mapContainer, e }) => {
-  const mapDimensions = mapContainer.current.getBoundingClientRect();
-  const popupMaxHeight = mapContainer.current.clientHeight / 2;
-  const popupWidthAbout = 400;
-
-  let popupAnchor = 'left';
-  if (e.point.y <= popupMaxHeight / 2 && e.point.x < mapDimensions.width - popupWidthAbout) {
-    popupAnchor = 'top-left';
-  } else if (e.point.y <= popupMaxHeight / 2
-    && e.point.x >= mapDimensions.width - popupWidthAbout) {
-    popupAnchor = 'top-right';
-  } else if (e.point.y >= mapDimensions.height - popupMaxHeight / 2
-    && e.point.x < mapDimensions.width - popupWidthAbout) {
-    popupAnchor = 'bottom-left';
-  } else if (e.point.y >= mapDimensions.height - popupMaxHeight / 2
-    && e.point.x >= mapDimensions.width - popupWidthAbout) {
-    popupAnchor = 'bottom-right';
-  } else if (e.point.x >= mapDimensions.width - popupWidthAbout) {
-    popupAnchor = 'right';
-  }
-  return popupAnchor;
-};
-
-const handleRightClick = ({
-  setFillCoorsNewPoint, handleSnackbarMessage, map, e, mapContainer, addPoint,
-}) => {
-  setFillCoorsNewPoint([e.lngLat.lng, e.lngLat.lat]);
-
-  /*
-  const divElement = document.createElement('div');
-
-  const styleFormField = { marginTop: 10 };
-
-  const popup = new mapboxgl.Popup({
-    anchor: setupPopupAnchor({ mapContainer, e }),
-  })
-    .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    .setDOMContent(divElement)
-    .addTo(map);
-
-  const PopupContent = () => {
-    const [fields, setFields] = useState({
-      title: '', type: '', category: '', groupID: '', lng: e.lngLat.lng, lat: e.lngLat.lat,
-    });
-
-    const onSubmit = async (ev) => {
-      ev.preventDefault();
-      const message = await addPoint({
-        variables: {
-          title: fields.title,
-          category: fields.category,
-          type: fields.type,
-          groupID: fields.groupID,
-          lng: fields.lng,
-          lat: fields.lat,
-        },
-      });
-
-      if (message) {
-        handleSnackbarMessage({ severity: 'success', message: `${fields.title} added` });
-      }
-
-      popup.remove();
-    };
-
-    return (
-      <div style={{ maxHeight: mapContainer.current.clientHeight / 2, overflowY: 'auto' }}>
-        <div>Add a point</div>
-        <ValidatorForm onSubmit={onSubmit} autoComplete="off">
-          <TextValidator
-            style={styleFormField}
-            size="small"
-            placeholder="e.g. Point A"
-            id="title"
-            label="Title"
-            errorMessages={['this field is required']}
-            validators={['required']}
-            value={fields.title}
-            onChange={(x) => setFields({ ...fields, title: x.target.value })}
-          />
-          <TextField
-            style={styleFormField}
-            size="small"
-            placeholder="e.g. line"
-            id="type"
-            label="Type"
-            value={fields.type}
-            onChange={(x) => setFields({ ...fields, type: x.target.value })}
-          />
-          <TextField
-            style={styleFormField}
-            size="small"
-            placeholder=""
-            id="groupid"
-            label="GroupID"
-            value={fields.groupID}
-            onChange={(x) => setFields({ ...fields, groupID: x.target.value })}
-          />
-          <TextField
-            style={styleFormField}
-            size="small"
-            placeholder="e.g. u-rack"
-            id="category"
-            label="Category"
-            value={fields.category}
-            onChange={(x) => setFields({ ...fields, category: x.target.value })}
-          />
-          <TextValidator
-            style={styleFormField}
-            size="small"
-            id="longitude"
-            label="Longitude"
-            value={fields.lng}
-            onChange={(x) => setFields({ ...fields, lng: x.target.value })}
-            errorMessages={['this field is required', 'number required', 'number between -180 to 180 required', 'number between -180 to 180 required']}
-            validators={['required', 'isFloat', 'minNumber:-180', 'maxNumber:180']}
-          />
-          <TextValidator
-            style={styleFormField}
-            size="small"
-            id="latitude"
-            label="Latitude"
-            value={fields.lat}
-            onChange={(x) => setFields({ ...fields, lat: x.target.value })}
-            errorMessages={['this field is required', 'number required', 'number between -90 to 90 required', 'number between -90 to 90 required']}
-            validators={['required', 'isFloat', 'minNumber:-90', 'maxNumber:90']}
-          />
-          <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
-        </ValidatorForm>
-      </div>
-    );
-  };
-
-  ReactDOM.render(
-    <PopupContent />,
-    divElement,
-  );
-  */
-};
-
-const handleLeftClick = ({
-  map, e, setSelectedFeatures, setTab, mapContainer,
-}) => {
-  const features = map.queryRenderedFeatures(e.point, {
-    layers: ['gl-draw-polygon-fill-inactive.cold'], // replace this with the name of the layer
-  });
-
-  if (!features.length) {
-    return;
-  }
-
-  const feature = features[0];
-
-  console.log('click feature: ', feature);
-  console.log('point: ', e);
-  const content = document.createElement('div');
-
-  const popup = new mapboxgl.Popup({
-    anchor: setupPopupAnchor({ mapContainer, e }),
-  })
-    .setLngLat([e.lngLat.lng, e.lngLat.lat])
-    // .setHTML(`<h3>${feature.properties.type}</h3>`)
-    .setDOMContent(content)
-    .addTo(map);
-
-  const onClick = () => {
-    setSelectedFeatures([feature]);
-    popup.remove();
-    setTab(1);
-  };
-
-  ReactDOM.render(
-    <div>
-      <Typography variant="body2">{feature.properties.user_title}</Typography>
-      <Button style={{ marginTop: Theme.spacing(1) }} color="primary" variant="contained" onClick={onClick}>more</Button>
-    </div>,
-    content,
-  );
-};
-
 const setupMap = ({
+  setCurrentFeature,
   setDraw,
   getFills,
   addFill,
-  setFillCoorsNewPoint,
-  handleSnackbarMessage,
-  addPoint,
   setMap,
-  setTab,
-  setSelectedFeatures,
   mapContainer,
   lng,
   lat,
@@ -244,28 +71,16 @@ const setupMap = ({
   const map = new mapboxgl.Map({
     attributionControl: false,
     container: mapContainer.current,
-    // style: 'mapbox://styles/mapbox/streets-v11',
     style: process.env.REACT_APP_MAPPBOX_STYLE,
     center: [lng, lat],
     zoom,
   });
 
-  /*
-  const Draw = new MapboxDraw();
-
-  // Map#addControl takes an optional second argument to set the position of the control.
-  // If no position is specified the control defaults to `top-right`. See the docs
-  // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
-
-  map.addControl(Draw, 'top-left');
-  */
-
-  console.log(defaultMapboxDrawStyles);
-
   const draw = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
     controls: {
+      point: true,
       polygon: true,
       trash: true,
     },
@@ -284,6 +99,32 @@ const setupMap = ({
   map.on('draw.create', (x) => {
     console.log('create: ', x);
     addFill({ variables: { id: x.features[0].id, title: `title_${x.features[0].id}`, coordinates: x.features[0].geometry.coordinates[0] } });
+
+    const displayPopup = () => {
+      const content = document.createElement('div');
+
+      const onClick = () => {
+        console.log('popup button click');
+      };
+
+      ReactDOM.render(
+        <div>
+          <div>Popup</div>
+          <Button style={{ marginTop: 5 }} color="primary" variant="contained" onClick={onClick}>more</Button>
+        </div>,
+        content,
+      );
+
+      const coors = x.features[0].geometry.coordinates.length === 2
+        ? x.features[0].geometry.coordinates
+        : x.features[0].geometry.coordinates[0][0];
+
+      const popup = new mapboxgl.Popup({ closeOnClick: false })
+        .setLngLat(coors)
+        .setDOMContent(content)
+        .addTo(map);
+    };
+    displayPopup();
   });
   map.on('draw.delete', (x) => console.log('delete: ', x));
   map.on('draw.update', (x) => console.log('update: ', x));
@@ -309,144 +150,7 @@ const setupMap = ({
 
     getFills();
     setDraw(draw);
-
-    // Add a data source containing GeoJSON data.
-    map.addSource('fills', {
-      type: 'geojson',
-      tolerance: 0,
-      data: {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          // These coordinates outline Maine.
-          coordinates: [[
-            [24.9454, 60.1755],
-            [24.9554, 60.1755],
-            [24.9554, 60.1655],
-            [24.9454, 60.1655],
-            [24.9454, 60.1755],
-          ]],
-        },
-      },
-    });
-
-    // Add a new layer to visualize the polygon.
-    map.addLayer({
-      id: 'fills',
-      type: 'fill',
-      source: 'fills', // reference the data source
-      layout: {},
-      paint: {
-        'fill-color': '#0080ff', // blue color fill
-        'fill-opacity': 0.5,
-      },
-    });
-
-    map.addSource('newFillPoints', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [
-          {
-            id: 11,
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [24.9454, 60.1745],
-            },
-          },
-          {
-            id: 12,
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [24.9464, 60.1745],
-            },
-          },
-        ],
-      },
-    });
-
-    map.addLayer({
-      id: 'newFillPoints',
-      type: 'circle',
-      source: 'newFillPoints',
-      layout: {},
-      paint: {
-        'circle-color': '#ffffff',
-      },
-    });
-
     setMap(map);
-  });
-  /*
-  map.on('load', () => {
-    // Add an image to use as a custom marker
-    map.loadImage(
-      'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
-      (error, image) => {
-        if (error) throw error;
-        map.addImage('custom-marker', image);
-
-        map.addSource('points', {
-          type: 'geojson',
-          tolerance: 0,
-          data: {
-            type: 'FeatureCollection',
-            features: [
-            ],
-          },
-        });
-
-        // Add a symbol layer
-        map.addLayer({
-          id: 'points',
-          type: 'symbol',
-          source: 'points',
-          layout: {
-            'icon-image': 'custom-marker',
-            'icon-anchor': 'bottom',
-            // get the title name from the source's "title" property
-            'text-field': ['get', 'title'],
-            'text-font': [
-              'Open Sans Semibold',
-              'Arial Unicode MS Bold',
-            ],
-            'text-offset': [0, 1.25],
-            'text-anchor': 'top',
-          },
-          paint: {
-            'text-color': 'white',
-            'text-halo-blur': 0,
-            'text-halo-width': 1,
-            'text-halo-color': 'black',
-          },
-        });
-        setMap(map);
-      },
-    );
-  });
-*/
-  // Change the cursor to a pointer when the mouse is over the places layer.
-  map.on('mouseenter', 'fills', () => {
-    map.getCanvas().style.cursor = 'pointer';
-  });
-
-  // Change it back to a pointer when it leaves.
-  map.on('mouseleave', 'fills', () => {
-    map.getCanvas().style.cursor = '';
-  });
-
-  map.on('contextmenu', (e) => {
-    handleRightClick({
-      setFillCoorsNewPoint, handleSnackbarMessage, map, e, mapContainer, addPoint,
-    });
-  });
-
-  map.on('click', (e) => {
-    handleLeftClick({
-      map, setSelectedFeatures, setTab, e, mapContainer,
-    });
   });
 
   map.on('move', () => {
@@ -461,14 +165,13 @@ const setupMap = ({
 };
 
 const Map = ({
-  setDraw, getFills, addFill, map, handleSnackbarMessage, setMap, addPoint, tab, setSelectedFeatures, setTab,
+  draw, setDraw, getFills, addFill, map, setMap, tab,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
-  const [fillCoors, setFillCoors] = useState([]);
-  const [fillCoorsNewPoint, setFillCoorsNewPoint] = useState([]);
+  const [currentFeature, setCurrentFeature] = useState(null);
 
   const mapContainer = useRef();
 
@@ -476,94 +179,60 @@ const Map = ({
     console.log(map.getStyle());
   }
 
-  /*
-  if (map) {
-    try {
-      console.log(map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties);
-      map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties = { // eslint-disable-line
-        id: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.id,
-        active: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.active,
-        mode: map.getStyle().sources['mapbox-gl-draw-cold'].data.features[0].properties.mode,
-      };
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  */
-  /*
   useEffect(() => {
-    const doIt = () => {
-      if (fillCoorsNewPoint.length) {
-        const currentFillCoors = [...fillCoors];
-        if (!currentFillCoors.length) {
-          currentFillCoors.push([fillCoorsNewPoint]);
-        } else if (currentFillCoors[currentFillCoors.length - 1].length < 4) {
-          currentFillCoors[currentFillCoors.length - 1].push(fillCoorsNewPoint);
-        } else {
-          currentFillCoors.push([fillCoorsNewPoint]);
-        }
-        setFillCoors(currentFillCoors);
-        console.log('currentFillCoors: ', currentFillCoors);
-        if (map) {
-          const newFillPointsSource = map.getSource('newFillPoints');
-          let features = [];
-          if (currentFillCoors[currentFillCoors.length - 1].length < 4) {
-            features = currentFillCoors[currentFillCoors.length - 1].map((x, y) => (
-              {
-                id: y,
-                type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [x[0], x[1]],
-                },
-              }
-            ));
-          }
-          console.log('features: ', features);
-          const points = {
-            type: 'FeatureCollection',
-            features,
-          };
-          newFillPointsSource.setData(points);
+    const doit = () => {
+      if (map && currentFeature) { //eslint-disable-line
+        console.log('poopup ');
+        const content = document.createElement('div');
 
-          const fillsSource = map.getSource('fills');
-          console.log('last: ', currentFillCoors.slice(-1));
-          let coordinates = [];
-          if (currentFillCoors.length === 1) {
-            coordinates = currentFillCoors[0].length > 2
-              ? currentFillCoors : [];
-          } else {
-            coordinates = currentFillCoors.slice(-1)[0].length > 2
-              ? currentFillCoors
-              : currentFillCoors.slice(0, -1);
-          }
-          console.log('coordinates: ', coordinates);
-          const fills = {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates,
-            },
-          };
-          fillsSource.setData(fills);
-        }
+        const onClick = () => {
+          console.log('popup button click');
+        };
+
+        ReactDOM.render(
+          <div>
+            <div>Popup</div>
+            <Button style={{ marginTop: 5 }} color="primary" variant="contained" onClick={onClick}>more</Button>
+          </div>,
+          content,
+        );
+
+        /*
+        const coors = currentFeature.features[0].geometry.coordinates.length === 2
+          ? currentFeature.features[0].geometry.coordinates
+          : currentFeature.features[0].geometry.coordinates[0][0];
+
+        console.log('coors: ', coors);
+*/
+
+        const popup = new mapboxgl.Popup()
+          .setLngLat([lng, lat])
+          .setDOMContent(content)
+          .addTo(map);
       }
     };
-    doIt();
-  }, [fillCoorsNewPoint]);
-*/
+    doit();
+  }, [map, currentFeature]);
+
+  useEffect(() => {
+    const doit = () => {
+      if (draw) {
+        document.querySelector('.mapbox-gl-draw_ctrl-draw-btn.mapbox-gl-draw_polygon')
+          .addEventListener('mousedown', () => {
+            console.log('polygon button click');
+          });
+      }
+    };
+    doit();
+  }, [draw]);
 
   useEffect(() => {
     setupMap({
+      setCurrentFeature,
       setDraw,
       getFills,
       addFill,
-      setFillCoorsNewPoint,
-      handleSnackbarMessage,
-      addPoint,
       setMap,
-      setTab,
-      setSelectedFeatures,
       mapContainer,
       lng,
       lat,
@@ -577,6 +246,9 @@ const Map = ({
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
       <div className={classes.sidebar}>
+        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+      </div>
+      <div className={classes.featureForm}>
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
       </div>
       <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
