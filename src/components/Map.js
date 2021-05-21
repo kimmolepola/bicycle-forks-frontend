@@ -4,7 +4,7 @@ import React, {
 import ReactDOM from 'react-dom';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Button,
+  Box, Button, TextField,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,6 +12,8 @@ import clsx from 'clsx';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import './mapbox-gl-draw.css';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import polylabel from '@mapbox/polylabel';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -51,8 +53,136 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const createFeatureEditPopup = ({ mapContainer, map, feature }) => {
+  const coors = feature.features[0].geometry.coordinates.length === 2
+    ? feature.features[0].geometry.coordinates
+    : polylabel(feature.features[0].geometry.coordinates);
+
+  console.log('coors: ', coors);
+
+  const inputTitle = React.createRef();
+  const inputType = React.createRef();
+  const inputGroupID = React.createRef();
+  const inputCategory = React.createRef();
+  const inputLng = React.createRef();
+  const inputLat = React.createRef();
+
+  const divElement = document.createElement('div');
+
+  const styleFormField = { marginTop: 10 };
+
+  const popup = new mapboxgl.Popup({ closeOnClick: false })
+    .setLngLat(coors)
+    .setDOMContent(divElement)
+    .addTo(map);
+
+  const removePopup = () => {
+    popup.remove();
+  };
+
+  const PopupContent = () => {
+    const [fields, setFields] = useState({
+      title: '', type: '', category: '', groupID: '', lng: coors[0], lat: coors[1],
+    });
+
+    const onSubmit = (ev) => {
+      ev.preventDefault();
+      const newPoint = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            fields.lng,
+            fields.lat,
+          ],
+        },
+        properties: {
+          title: fields.title,
+          type: fields.type,
+          category: fields.category,
+          groupID: fields.groupID,
+        },
+      };
+
+      popup.remove();
+    };
+
+    return (
+      <div style={{ maxHeight: mapContainer.current.clientHeight / 3, overflowY: 'auto' }}>
+        <div>Add a point</div>
+        <ValidatorForm onSubmit={onSubmit} autoComplete="off">
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. Point A"
+            id="title"
+            label="Title"
+            errorMessages={['this field is required']}
+            validators={['required']}
+            value={fields.title}
+            onChange={(y) => setFields({ ...fields, title: y.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. line"
+            id="type"
+            label="Type"
+            value={fields.type}
+            onChange={(y) => setFields({ ...fields, type: y.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder=""
+            id="groupid"
+            label="GroupID"
+            value={fields.groupID}
+            onChange={(y) => setFields({ ...fields, groupID: y.target.value })}
+          />
+          <TextField
+            style={styleFormField}
+            size="small"
+            placeholder="e.g. u-rack"
+            id="category"
+            label="Category"
+            value={fields.category}
+            onChange={(y) => setFields({ ...fields, category: y.target.value })}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="longitude"
+            label="Longitude"
+            value={fields.lng}
+            onChange={(y) => setFields({ ...fields, lng: y.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -180 to 180 required', 'number between -180 to 180 required']}
+            validators={['required', 'isFloat', 'minNumber:-180', 'maxNumber:180']}
+          />
+          <TextValidator
+            style={styleFormField}
+            size="small"
+            id="latitude"
+            label="Latitude"
+            value={fields.lat}
+            onChange={(y) => setFields({ ...fields, lat: y.target.value })}
+            errorMessages={['this field is required', 'number required', 'number between -90 to 90 required', 'number between -90 to 90 required']}
+            validators={['required', 'isFloat', 'minNumber:-90', 'maxNumber:90']}
+          />
+          <Button style={styleFormField} type="submit" variant="contained" color="primary">Submit</Button>
+        </ValidatorForm>
+      </div>
+    );
+  };
+  ReactDOM.render(
+    <PopupContent />,
+    divElement,
+  );
+  return popup;
+};
+
 const setupMap = ({
-  setCurrentFeature,
+  setCurrentPopup,
   setDraw,
   getFills,
   addFill,
@@ -99,32 +229,7 @@ const setupMap = ({
   map.on('draw.create', (x) => {
     console.log('create: ', x);
     addFill({ variables: { id: x.features[0].id, title: `title_${x.features[0].id}`, coordinates: x.features[0].geometry.coordinates[0] } });
-
-    const displayPopup = () => {
-      const content = document.createElement('div');
-
-      const onClick = () => {
-        console.log('popup button click');
-      };
-
-      ReactDOM.render(
-        <div>
-          <div>Popup</div>
-          <Button style={{ marginTop: 5 }} color="primary" variant="contained" onClick={onClick}>more</Button>
-        </div>,
-        content,
-      );
-
-      const coors = x.features[0].geometry.coordinates.length === 2
-        ? x.features[0].geometry.coordinates
-        : x.features[0].geometry.coordinates[0][0];
-
-      const popup = new mapboxgl.Popup({ closeOnClick: false })
-        .setLngLat(coors)
-        .setDOMContent(content)
-        .addTo(map);
-    };
-    displayPopup();
+    setCurrentPopup(createFeatureEditPopup({ feature: x, map, mapContainer }));
   });
   map.on('draw.delete', (x) => console.log('delete: ', x));
   map.on('draw.update', (x) => console.log('update: ', x));
@@ -171,9 +276,11 @@ const Map = ({
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
-  const [currentFeature, setCurrentFeature] = useState(null);
+  const [currentPopup, setCurrentPopup] = useState(null);
 
   const mapContainer = useRef();
+  const asdf = useRef();
+  asdf.current = currentPopup;
 
   if (map) {
     console.log(map.getStyle());
@@ -181,38 +288,12 @@ const Map = ({
 
   useEffect(() => {
     const doit = () => {
-      if (map && currentFeature) { //eslint-disable-line
-        console.log('poopup ');
-        const content = document.createElement('div');
-
-        const onClick = () => {
-          console.log('popup button click');
-        };
-
-        ReactDOM.render(
-          <div>
-            <div>Popup</div>
-            <Button style={{ marginTop: 5 }} color="primary" variant="contained" onClick={onClick}>more</Button>
-          </div>,
-          content,
-        );
-
-        /*
-        const coors = currentFeature.features[0].geometry.coordinates.length === 2
-          ? currentFeature.features[0].geometry.coordinates
-          : currentFeature.features[0].geometry.coordinates[0][0];
-
-        console.log('coors: ', coors);
-*/
-
-        const popup = new mapboxgl.Popup()
-          .setLngLat([lng, lat])
-          .setDOMContent(content)
-          .addTo(map);
+      if (currentPopup) {
+        currentPopup.setLngLat(currentPopup.getLngLat());
       }
     };
     doit();
-  }, [map, currentFeature]);
+  }, [currentPopup]);
 
   useEffect(() => {
     const doit = () => {
@@ -228,7 +309,7 @@ const Map = ({
 
   useEffect(() => {
     setupMap({
-      setCurrentFeature,
+      setCurrentPopup,
       setDraw,
       getFills,
       addFill,
