@@ -12,9 +12,9 @@ const client = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          allPoints: {
+          allFeatures: {
             merge(existing = [], incoming) {
-              return [...existing, ...incoming];
+              return incoming;
             },
           },
         },

@@ -9,11 +9,13 @@ import {
   useLazyQuery,
 } from '@apollo/client';
 
+import { BrowserView, MobileView } from 'react-device-detect';
 import Navigator from './components/Navigator';
 import Map from './components/Map';
 import Header from './components/Header';
 import Theme from './Theme';
 import Points from './components/Points';
+import MapMobile from './components/MapMobile';
 
 const drawerWidth = 256;
 
@@ -48,60 +50,47 @@ const useStyles = makeStyles({
   },
 });
 
-const ADD_FILL = gql`mutation ($id: ID!, $title: String!, $category: String, $type: String, $coordinates: [[Float!]!]!){
-  addFill(
+const DELETE_FEATURE = gql`mutation ($id: ID!){
+  deleteFeature(
+    id: $id
+  )
+}`;
+
+const EDIT_FEATURE = gql`mutation ($id: ID!, $title: String!, $type: String, $geometryType: String!, $coordinates: [[Float!]!]!){
+  editFeature(
     id: $id
     title: $title
-    category: $category
     type: $type
+    geometryType: $geometryType
     coordinates: $coordinates    
   )
 }`;
 
-const ALL_FILLS = gql`query{allFills{id, title, category, type, coordinates}}`;
-
-const DELETE_POINT = gql`mutation ($id: ID!){
-  deletePoint(
+const ADD_FEATURE = gql`mutation ($id: ID!, $title: String!, $type: String, $geometryType: String!, $coordinates: [[Float!]!]!){
+  addFeature(
     id: $id
+    title: $title
+    type: $type
+    geometryType: $geometryType
+    coordinates: $coordinates    
   )
 }`;
 
-const EDIT_POINT = gql`mutation ($id: ID!, $title: String, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
-  editPoint(
-    id: $id
-    title: $title
-    category: $category
-    type: $type
-    groupID: $groupID
-    lng: $lng
-    lat: $lat
-  )
-}`;
-
-const ADD_POINT = gql`mutation ($title: String!, $category: String, $type: String, $groupID: String, $lng: Float!, $lat: Float!){
-  addPoint(
-    title: $title
-    category: $category
-    type: $type
-    groupID: $groupID
-    lng: $lng
-    lat: $lat
-  ) 
-}`;
-
-const ALL_POINTS = gql`query{allPoints{id, mapboxFeatureID, title, category, type, groupID, lng, lat}}`;
+const ALL_FEATURES = gql`query{allFeatures{id, title, type, geometryType, coordinates}}`;
 
 const App = () => {
+  const [width, setWidth] = useState(window.innerWidth);
   const [map, setMap] = useState(null);
+  const [mapMobile, setMapMobile] = useState(null);
   const [tab, setTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [features, setFeatures] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [navigation, setNavigation] = useState('App');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarTransition] = useState(() => function slide(props) { return <Slide {...props} direction="left" />; });
   const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'info' });
   const [draw, setDraw] = useState(null);
+  const [drawMobile, setDrawMobile] = useState(null);
 
   const classes = useStyles();
 
@@ -115,65 +104,69 @@ const App = () => {
     console.error(error);
   };
 
-  const [getFills, { loading, data: fillsLazyQueryData }] = useLazyQuery(ALL_FILLS, { fetchPolicy: 'network-only' });
-
-  const [addFill] = useMutation(ADD_FILL, {
+  const [deleteFeature] = useMutation(DELETE_FEATURE, {
     onError: handleError,
-    refetchQueries: [{ query: ALL_FILLS, notifyOnNetworkStatusChange: true }],
+    refetchQueries: [{ query: ALL_FEATURES, notifyOnNetworkStatusChange: true }],
   });
+
+  const [editFeature] = useMutation(EDIT_FEATURE, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_FEATURES, notifyOnNetworkStatusChange: true }],
+  });
+
+  const [addFeature] = useMutation(ADD_FEATURE, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_FEATURES, notifyOnNetworkStatusChange: true }],
+  });
+
+  const [getFeatures, { loading, data: featuresLazyQueryData }] = useLazyQuery(ALL_FEATURES, { fetchPolicy: 'network-only' });
 
   const {
-    loading: fillsLoading,
-    error: fillsError,
-    data: fillsData,
-  } = useQuery(ALL_FILLS, { fetchPolicy: 'network-only' });
+    loading: featuresLoading,
+    error: featuresError,
+    data: featuresData,
+  } = useQuery(ALL_FEATURES, { fetchPolicy: 'network-only' });
 
-  const [deletePoint] = useMutation(DELETE_POINT, {
-    onError: handleError,
-    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
-  });
+  const handleWindowSizeChange = () => {
+    setWidth(window.innerWidth);
+  };
 
-  const [editPoint] = useMutation(EDIT_POINT, {
-    onError: handleError,
-    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
-  });
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    };
+  }, []);
 
-  const [addPoint] = useMutation(ADD_POINT, {
-    onError: handleError,
-    refetchQueries: [{ query: ALL_POINTS, notifyOnNetworkStatusChange: true }],
-  });
-
-  const {
-    loading: pointsLoading,
-    error: pointsError,
-    data: pointsData,
-  } = useQuery(ALL_POINTS, { fetchPolicy: 'network-only' });
+  const isMobile = width <= 768;
 
   useEffect(() => {
     const doit = () => {
-      console.log('fillsData: ', fillsData);
-      if (draw && fillsData) {
-        const fills = {
+      if (map && draw && featuresData && mapMobile && drawMobile) {
+        const featuresFromDB = {
           type: 'FeatureCollection',
-          features: fillsData.allFills.map((x) => (
+          features: featuresData.allFeatures.map((x) => (
             {
               id: x.id,
               type: 'Feature',
               geometry: {
-                type: 'Polygon',
-                coordinates: [x.coordinates],
+                type: x.geometryType,
+                coordinates: x.geometryType === 'Point' ? x.coordinates[0] : [[...x.coordinates, x.coordinates[0]]],
               },
               properties: {
                 title: x.title,
+                type: x.type,
               },
             })),
         };
-        console.log('fills draw set: ', fills);
-        draw.set(fills);
+        draw.set(featuresFromDB);
+        drawMobile.set(featuresFromDB);
+        map.getSource('labels').setData(featuresFromDB);
+        mapMobile.getSource('labels').setData(featuresFromDB);
       }
     };
     doit();
-  }, [fillsData, draw]);
+  }, [featuresData, draw, map, mapMobile, drawMobile]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -181,7 +174,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={Theme}>
-      <div className={classes.root}>
+      <div className={classes.root} style={{ display: isMobile ? 'none' : 'flex' }}>
         <CssBaseline />
         <Snackbar TransitionComponent={snackbarTransition} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={snackbarOpen} autoHideDuration={5000}>
           <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarMessage.severity}>
@@ -216,25 +209,26 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
-              draw={draw}
+              deleteFeature={deleteFeature}
+              handleSnackbarMessage={handleSnackbarMessage}
+              editFeature={editFeature}
               setDraw={setDraw}
-              getFills={getFills}
-              addFill={addFill}
-              map={map}
+              getFeatures={getFeatures}
+              addFeature={addFeature}
               setMap={setMap}
               tab={tab}
             />
-            <Points
-              handleSnackbarMessage={handleSnackbarMessage}
-              deletePoint={deletePoint}
-              editPoint={editPoint}
-              tab={tab}
-              features={features}
-              selectedFeatures={selectedFeatures}
-              setSelectedFeatures={setSelectedFeatures}
-            />
+            <div style={{ display: tab === 1 ? 'flex' : 'none' }}>Lorem ipsum</div>
           </main>
         </div>
+      </div>
+      <div style={{ display: isMobile ? 'flex' : 'none', flex: 1, minHeight: '100vh' }}>
+        <CssBaseline />
+        <MapMobile
+          getFeatures={getFeatures}
+          setMapMobile={setMapMobile}
+          setDrawMobile={setDrawMobile}
+        />
       </div>
     </ThemeProvider>
   );

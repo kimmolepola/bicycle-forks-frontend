@@ -4,7 +4,7 @@ import React, {
 import ReactDOM from 'react-dom';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Button, TextField, Typography,
+  Box, Button, TextField, Typography, Fab, AppBar, CssBaseline, Grid, Paper, IconButton, InputBase,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,8 +14,14 @@ import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import './mapbox-gl-draw.css';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import polylabel from '@mapbox/polylabel';
+import { Search as SearchIcon, Add as AddIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
+  app: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
   container: {
     flex: 1,
     position: 'relative',
@@ -27,18 +33,6 @@ const useStyles = makeStyles((theme) => ({
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  sidebar: {
-    position: 'absolute',
-    backgroundColor: 'rgba(35, 55, 75, 0.9)',
-    color: '#ffffff',
-    padding: '6px 12px',
-    font: '15px/24px monospace',
-    zIndex: 1,
-    top: 0,
-    left: 0,
-    margin: '12px',
-    borderRadius: '4px',
   },
 }));
 
@@ -219,11 +213,6 @@ const setupMap = ({
   const draw = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
-    controls: {
-      point: true,
-      polygon: true,
-      trash: true,
-    },
     styles: defaultMapboxDrawStyles.map((x) => {
       switch (x.id) {
         case 'gl-draw-polygon-fill-inactive':
@@ -256,22 +245,22 @@ const setupMap = ({
 
   map.on('load', () => {
     map.addControl(draw);
-    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.NavigationControl({ showZoom: false }));
     map.addControl(new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true,
       },
       trackUserLocation: true,
     }));
-    map.addControl(new mapboxgl.AttributionControl({
-      compact: true,
-    }));
+    /*
     const scale = new mapboxgl.ScaleControl({
       maxWidth: 80,
       unit: 'imperial',
     });
     map.addControl(scale);
     scale.setUnit('metric');
+    */
+    map.addControl(new mapboxgl.FullscreenControl());
 
     map.addSource('labels', {
       type: 'geojson',
@@ -324,20 +313,21 @@ const setupMap = ({
 };
 
 const Map = ({
+  setDrawMobile: setDraw,
   deleteFeature,
   handleSnackbarMessage,
   editFeature,
-  setDraw,
   getFeatures,
   addFeature,
-  setMap,
-  tab,
+  setMapMobile: setMap,
 }) => {
   const classes = useStyles();
   const [lng, setLng] = useState(24.9454);
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
   const [currentPopup, setCurrentPopup] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const mapContainer = useRef();
 
@@ -370,13 +360,37 @@ const Map = ({
     });
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
-    <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
-      <div className={classes.sidebar}>
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-      </div>
-      <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
-    </Box>
+    <div className={classes.app}>
+      <Box className={classes.container}>
+        <div className={clsx('map-container', classes.mapContainer)} style={{ display: '' }} ref={mapContainer} />
+        <Fab onClick={(x) => setSearchOpen(!searchOpen)} style={{ position: 'absolute', bottom: 100, right: 20 }} size="medium" color="primary" aria-label="add">
+          <AddIcon />
+        </Fab>
+        <Paper style={{ display: 'flex', margin: 15, marginRight: 50 }}>
+          <Paper
+            onSubmit={handleSearchSubmit}
+            component="form"
+            style={{
+              background: 'white', display: searchOpen ? 'flex' : 'none', flex: 1, zIndex: 2,
+            }}
+          >
+            <InputBase
+              style={{ marginLeft: 10, flex: 1 }}
+              placeholder="Search (not implemented yet)"
+              inputProps={{ 'aria-label': 'search' }}
+            />
+            <IconButton type="submit" className={classes.iconButton} aria-label="search">
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+        </Paper>
+      </Box>
+    </div>
   );
 };
 
