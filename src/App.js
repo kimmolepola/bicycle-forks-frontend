@@ -83,7 +83,7 @@ const App = () => {
   const [map, setMap] = useState(null);
   const [mapMobile, setMapMobile] = useState(null);
   const [tab, setTab] = useState(0);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [navigation, setNavigation] = useState('App');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -140,6 +140,11 @@ const App = () => {
 
   const isMobile = width <= 768;
 
+  if (map && mapMobile) {
+    console.log('map: ', map.getStyle());
+    console.log('mapMobile: ', mapMobile.getStyle());
+  }
+
   useEffect(() => {
     const doit = () => {
       if (map && draw && featuresData && mapMobile && drawMobile) {
@@ -168,9 +173,13 @@ const App = () => {
     doit();
   }, [featuresData, draw, map, mapMobile, drawMobile]);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  useEffect(() => {
+    (() => {
+      if (map) {
+        map.resize();
+      }
+    })();
+  }, [drawerOpen]);
 
   return (
     <ThemeProvider theme={Theme}>
@@ -181,31 +190,21 @@ const App = () => {
             {snackbarMessage.message}
           </Alert>
         </Snackbar>
-        <nav className={classes.drawer}>
-          <Hidden smUp implementation="js">
-            <Navigator
-              PaperProps={{ style: { width: drawerWidth } }}
-              variant="temporary"
-              open={mobileOpen}
-              onClose={handleDrawerToggle}
-              navigation={navigation}
-              setNavigation={setNavigation}
-            />
-          </Hidden>
-          <Hidden xsDown implementation="css">
-            <Navigator
-              PaperProps={{ style: { width: drawerWidth } }}
-              navigation={navigation}
-              setNavigation={setNavigation}
-            />
-          </Hidden>
+        <nav style={{ display: drawerOpen ? '' : 'none' }} className={classes.drawer}>
+          <Navigator
+            PaperProps={{ style: { width: drawerWidth } }}
+            navigation={navigation}
+            setNavigation={setNavigation}
+            setDrawerOpen={setDrawerOpen}
+          />
         </nav>
         <div className={classes.app}>
           <Header
             tab={tab}
             setTab={setTab}
             className={classes.header}
-            onDrawerToggle={handleDrawerToggle}
+            setDrawerOpen={setDrawerOpen}
+            drawerOpen={drawerOpen}
           />
           <main className={classes.main}>
             <Map
@@ -222,7 +221,10 @@ const App = () => {
           </main>
         </div>
       </div>
-      <div style={{ display: isMobile ? 'flex' : 'none', flex: 1, minHeight: '100vh' }}>
+      <div style={{
+        display: isMobile ? 'flex' : 'none', flex: 1, position: 'fixed', width: '100%', height: '100%',
+      }}
+      >
         <CssBaseline />
         <MapMobile
           getFeatures={getFeatures}

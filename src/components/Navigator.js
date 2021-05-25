@@ -8,6 +8,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Button,
 } from '@material-ui/core';
 import {
   DirectionsBike as DirectionsBikeIcon,
@@ -21,6 +22,7 @@ import {
   Timer as TimerIcon,
   Settings as SettingsIcon,
   PhonelinkSetup as PhonelinkSetupIcon,
+  Close as CloseIcon,
 } from '@material-ui/icons';
 import Theme from '../Theme';
 
@@ -65,7 +67,9 @@ const useStyles = makeStyles({
   },
 });
 
-const Navigator = ({ navigation, setNavigation, ...other }) => {
+const Navigator = ({
+  setDrawerOpen, navigation, setNavigation, ...other
+}) => {
   const classes = useStyles();
 
   const categories = [
@@ -81,6 +85,9 @@ const Navigator = ({ navigation, setNavigation, ...other }) => {
       <List disablePadding>
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
           Safebike
+          <Button onClick={() => setDrawerOpen(false)}>
+            <CloseIcon style={{ position: 'absolute', right: 20 }} />
+          </Button>
         </ListItem>
         {categories.map(({ id, children }) => (
           <React.Fragment key={id}>

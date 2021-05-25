@@ -30,7 +30,9 @@ const useStyles = makeStyles({
   },
 });
 
-const Header = ({ onDrawerToggle, tab, setTab }) => {
+const Header = ({
+  drawerOpen, setDrawerOpen, tab, setTab,
+}) => {
   const classes = useStyles();
 
   return (
@@ -38,18 +40,17 @@ const Header = ({ onDrawerToggle, tab, setTab }) => {
       <AppBar color="primary" position="sticky" elevation={0}>
         <Toolbar>
           <Grid container spacing={1} alignItems="center">
-            <Hidden smUp>
-              <Grid item>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  onClick={onDrawerToggle}
-                  className={classes.menuButton}
-                >
-                  <MenuIcon />
-                </IconButton>
-              </Grid>
-            </Hidden>
+            <Grid item>
+              <IconButton
+                style={{ display: drawerOpen ? 'none' : '' }}
+                color="inherit"
+                aria-label="open drawer"
+                onClick={() => setDrawerOpen(true)}
+                className={classes.menuButton}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Grid>
             <Grid item xs />
           </Grid>
         </Toolbar>

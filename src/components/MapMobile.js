@@ -252,14 +252,12 @@ const setupMap = ({
       },
       trackUserLocation: true,
     }));
-    /*
     const scale = new mapboxgl.ScaleControl({
       maxWidth: 80,
       unit: 'imperial',
     });
     map.addControl(scale);
     scale.setUnit('metric');
-    */
     map.addControl(new mapboxgl.FullscreenControl());
 
     map.addSource('labels', {
@@ -368,7 +366,7 @@ const Map = ({
     <div className={classes.app}>
       <Box className={classes.container}>
         <div className={clsx('map-container', classes.mapContainer)} style={{ display: '' }} ref={mapContainer} />
-        <Fab onClick={(x) => setSearchOpen(!searchOpen)} style={{ position: 'absolute', bottom: 100, right: 20 }} size="medium" color="primary" aria-label="add">
+        <Fab onClick={(x) => setSearchOpen(!searchOpen)} style={{ position: 'absolute', bottom: 50, right: 30 }} color="primary" aria-label="add">
           <AddIcon />
         </Fab>
         <Paper style={{ display: 'flex', margin: 15, marginRight: 50 }}>

@@ -4,7 +4,19 @@ import React, {
 import ReactDOM from 'react-dom';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box, Button, TextField, Typography,
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Fab,
+  AppBar,
+  CssBaseline,
+  Grid,
+  Paper,
+  IconButton,
+  InputBase,
+  Menu,
+  MenuItem,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,6 +26,7 @@ import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import './mapbox-gl-draw.css';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import polylabel from '@mapbox/polylabel';
+import { Search as SearchIcon, Add as AddIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -37,10 +50,38 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     top: 0,
     left: 0,
-    margin: '12px',
     borderRadius: '4px',
   },
 }));
+
+const handleRightClick = ({ e, draw }) => {
+  const divElement = document.createElement('div');
+
+  const PopupContent = () => {
+    const [open, setOpen] = useState(true);
+
+    return (
+      <div>
+        <Menu
+          id="simple-menu"
+          anchorReference="anchorPosition"
+          anchorPosition={{ left: e.originalEvent.clientX, top: e.originalEvent.clientY }}
+          keepMounted
+          open={open}
+          onClose={() => setOpen(false)}
+        >
+          <MenuItem onClick={() => { draw.changeMode('draw_point'); setOpen(false); }}>Add point</MenuItem>
+          <MenuItem onClick={() => { draw.changeMode('draw_polygon'); setOpen(false); }}>Add area</MenuItem>
+        </Menu>
+      </div>
+    );
+  };
+
+  ReactDOM.render(
+    <PopupContent />,
+    divElement,
+  );
+};
 
 const createFeatureEditPopup = ({
   handleSnackbarMessage, editFeature, addFeature, draw, mapContainer, map, feature,
@@ -211,7 +252,7 @@ const setupMap = ({
   const map = new mapboxgl.Map({
     attributionControl: false,
     container: mapContainer.current,
-    style: process.env.REACT_APP_MAPPBOX_STYLE,
+    style: 'mapbox://styles/mapbox/streets-v11',
     center: [lng, lat],
     zoom,
   });
@@ -296,7 +337,12 @@ const setupMap = ({
           'Open Sans Semibold',
           'Arial Unicode MS Bold',
         ],
-        'text-offset': [0, 0.3],
+        'text-offset': [
+          'case',
+          ['==', ['geometry-type'], 'Point'],
+          ['literal', [0, 0.4]],
+          ['literal', [0, 0]],
+        ],
         'text-anchor': 'top',
       },
       paint: {
@@ -310,6 +356,10 @@ const setupMap = ({
     getFeatures();
     setDraw(draw);
     setMap(map);
+  });
+
+  map.on('contextmenu', (e) => {
+    handleRightClick({ e, draw });
   });
 
   map.on('move', () => {
@@ -338,6 +388,8 @@ const Map = ({
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
   const [currentPopup, setCurrentPopup] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const mapContainer = useRef();
 
@@ -370,12 +422,40 @@ const Map = ({
     });
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
-      <div className={classes.sidebar}>
+      <div
+        className={classes.sidebar}
+        style={searchOpen ? { marginLeft: 12, marginTop: 66 } : { margin: 12 }}
+      >
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
       </div>
       <div className={clsx('map-container', classes.mapContainer)} ref={mapContainer} />
+      <Fab onClick={(x) => setSearchOpen(!searchOpen)} style={{ position: 'absolute', bottom: 50, right: 30 }} color="primary" aria-label="add">
+        <AddIcon />
+      </Fab>
+      <Paper style={{ display: 'flex', margin: 12, marginRight: 50 }}>
+        <Paper
+          onSubmit={handleSearchSubmit}
+          component="form"
+          style={{
+            background: 'white', display: searchOpen ? 'flex' : 'none', flex: 1, zIndex: 2,
+          }}
+        >
+          <InputBase
+            style={{ marginLeft: 10, flex: 1 }}
+            placeholder="Search (not implemented yet)"
+            inputProps={{ 'aria-label': 'search' }}
+          />
+          <IconButton type="submit" className={classes.iconButton} aria-label="search">
+            <SearchIcon />
+          </IconButton>
+        </Paper>
+      </Paper>
     </Box>
   );
 };
