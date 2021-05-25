@@ -49,3 +49,5 @@ päivä		aika	kumul.	mitä tein
 21.5.		2:00	107:20	popup anchor
 23.5.		6:30	113:50	area or point create, edit or delete
 23.5.		3:20	117:10	mobile view
+24.5.		2:10	119:20	map container position, map layer, context menu
+25.5.		3:00	122:20	feature text offset, street view, right click menu, fab on web view, collapsible left pane
