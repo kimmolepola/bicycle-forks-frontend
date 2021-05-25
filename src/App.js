@@ -91,6 +91,7 @@ const App = () => {
   const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'info' });
   const [draw, setDraw] = useState(null);
   const [drawMobile, setDrawMobile] = useState(null);
+  const [counter, setCounter] = useState(0);
 
   const classes = useStyles();
 
@@ -129,7 +130,30 @@ const App = () => {
 
   const handleWindowSizeChange = () => {
     setWidth(window.innerWidth);
+    console.log('window size change');
+    console.log('event, map: ', map, 'event, mapMobile: ', mapMobile);
+    if (map) {
+      console.log('map resize');
+      map.resize();
+    }
+    if (mapMobile) {
+      console.log('mobile map resize');
+      mapMobile.resize();
+    }
   };
+
+  useEffect(() => {
+    console.log('counter: ', counter, 'effect map: ', map, 'effect mapMobile: ', mapMobile);
+    setCounter(counter + 1);
+    if (map) {
+      console.log('effect map resize');
+      map.resize();
+    }
+    if (mapMobile) {
+      console.log('effect mobile map resize');
+      mapMobile.resize();
+    }
+  }, [map, mapMobile]);
 
   useEffect(() => {
     window.addEventListener('resize', handleWindowSizeChange);
@@ -139,11 +163,6 @@ const App = () => {
   }, []);
 
   const isMobile = width <= 768;
-
-  if (map && mapMobile) {
-    console.log('map: ', map.getStyle());
-    console.log('mapMobile: ', mapMobile.getStyle());
-  }
 
   useEffect(() => {
     const doit = () => {
@@ -180,6 +199,8 @@ const App = () => {
       }
     })();
   }, [drawerOpen]);
+
+  console.log('map: ', map, 'mobile map: ', mapMobile);
 
   return (
     <ThemeProvider theme={Theme}>
