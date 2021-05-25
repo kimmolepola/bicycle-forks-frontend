@@ -51,3 +51,4 @@ päivä		aika	kumul.	mitä tein
 23.5.		3:20	117:10	mobile view
 24.5.		2:10	119:20	map container position, map layer, context menu
 25.5.		3:00	122:20	feature text offset, street view, right click menu, fab on web view, collapsible left pane
+			0:30	122:50	window resize, drawer button
