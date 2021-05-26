@@ -84,14 +84,12 @@ const App = () => {
   const [mapMobile, setMapMobile] = useState(null);
   const [tab, setTab] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(true);
-  const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [navigation, setNavigation] = useState('App');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarTransition] = useState(() => function slide(props) { return <Slide {...props} direction="left" />; });
   const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'info' });
   const [draw, setDraw] = useState(null);
   const [drawMobile, setDrawMobile] = useState(null);
-  const [counter, setCounter] = useState(0);
 
   const classes = useStyles();
 
@@ -128,37 +126,19 @@ const App = () => {
     data: featuresData,
   } = useQuery(ALL_FEATURES, { fetchPolicy: 'network-only' });
 
-  const handleWindowSizeChange = () => {
-    setWidth(window.innerWidth);
-    console.log('window size change');
-    console.log('event, map: ', map, 'event, mapMobile: ', mapMobile);
+  useEffect(() => {
     if (map) {
-      console.log('map resize');
       map.resize();
     }
     if (mapMobile) {
-      console.log('mobile map resize');
       mapMobile.resize();
     }
-  };
+  }, [map, mapMobile, width, drawerOpen]);
 
   useEffect(() => {
-    console.log('counter: ', counter, 'effect map: ', map, 'effect mapMobile: ', mapMobile);
-    setCounter(counter + 1);
-    if (map) {
-      console.log('effect map resize');
-      map.resize();
-    }
-    if (mapMobile) {
-      console.log('effect mobile map resize');
-      mapMobile.resize();
-    }
-  }, [map, mapMobile]);
-
-  useEffect(() => {
-    window.addEventListener('resize', handleWindowSizeChange);
+    window.addEventListener('resize', () => setWidth(window.innerWidth));
     return () => {
-      window.removeEventListener('resize', handleWindowSizeChange);
+      window.removeEventListener('resize', () => setWidth(window.innerWidth));
     };
   }, []);
 
@@ -191,16 +171,6 @@ const App = () => {
     };
     doit();
   }, [featuresData, draw, map, mapMobile, drawMobile]);
-
-  useEffect(() => {
-    (() => {
-      if (map) {
-        map.resize();
-      }
-    })();
-  }, [drawerOpen]);
-
-  console.log('map: ', map, 'mobile map: ', mapMobile);
 
   return (
     <ThemeProvider theme={Theme}>
