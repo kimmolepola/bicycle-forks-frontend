@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline, Hidden, Typography, Link, Snackbar, Slide,
+  CssBaseline, Snackbar, Slide,
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import {
@@ -9,7 +9,6 @@ import {
   useLazyQuery,
 } from '@apollo/client';
 
-import { BrowserView, MobileView } from 'react-device-detect';
 import Navigator from './components/Navigator';
 import Map from './components/Map';
 import Header from './components/Header';

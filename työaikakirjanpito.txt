@@ -53,3 +53,4 @@ päivä		aika	kumul.	mitä tein
 25.5.		3:00	122:20	feature text offset, street view, right click menu, fab on web view, collapsible left pane
 			0:30	122:50	window resize, drawer button
 26.5.		0:20	123:10	window resize
+30.5.		0:30	123:40	map setup refactoring
