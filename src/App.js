@@ -49,7 +49,7 @@ const useStyles = makeStyles({
   },
 });
 
-const DELETE_FEATURE = gql`mutation ($id: ID!){
+export const DELETE_FEATURE = gql`mutation ($id: ID!){
   deleteFeature(
     id: $id
   )

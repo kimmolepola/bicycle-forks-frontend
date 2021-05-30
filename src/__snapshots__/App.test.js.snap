@@ -1,0 +1,528 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without error 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="makeStyles-root-1"
+        style="display: flex;"
+      >
+        <nav
+          class="makeStyles-drawer-2"
+        >
+          <div
+            class="MuiDrawer-root MuiDrawer-docked"
+          >
+            <div
+              class="MuiPaper-root MuiDrawer-paper MuiDrawer-paperAnchorLeft MuiDrawer-paperAnchorDockedLeft MuiPaper-elevation0"
+              style="width: 256px;"
+            >
+              <ul
+                class="MuiList-root"
+              >
+                <li
+                  class="MuiListItem-root makeStyles-firebase-11 makeStyles-item-9 makeStyles-itemCategory-10 MuiListItem-gutters"
+                >
+                  Safebike
+                  <button
+                    class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-colorInherit"
+                    style="position: absolute; right: 0px;"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      class="MuiButton-label"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="MuiTouchRipple-root"
+                    />
+                  </button>
+                </li>
+                <li
+                  class="MuiListItem-root makeStyles-categoryHeader-7 MuiListItem-gutters"
+                >
+                  <div
+                    class="MuiListItemText-root"
+                  >
+                    <span
+                      class="MuiTypography-root MuiListItemText-primary makeStyles-categoryHeaderPrimary-8 MuiTypography-body1 MuiTypography-displayBlock"
+                    >
+                      Admin
+                    </span>
+                  </div>
+                </li>
+                <div
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiListItem-root makeStyles-item-9 makeStyles-itemActiveItem-12 MuiListItem-gutters MuiListItem-button"
+                  role="button"
+                  tabindex="0"
+                >
+                  <div
+                    class="MuiListItemIcon-root makeStyles-itemIcon-14"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"
+                      />
+                    </svg>
+                  </div>
+                  <div
+                    class="MuiListItemText-root"
+                  >
+                    <span
+                      class="MuiTypography-root MuiListItemText-primary makeStyles-itemPrimary-13 MuiTypography-body1 MuiTypography-displayBlock"
+                    >
+                      App
+                    </span>
+                  </div>
+                  <span
+                    class="MuiTouchRipple-root"
+                  />
+                </div>
+                <hr
+                  class="MuiDivider-root makeStyles-divider-15"
+                />
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <div
+          class="makeStyles-app-3"
+        >
+          <header
+            class="MuiPaper-root MuiAppBar-root MuiAppBar-positionSticky MuiAppBar-colorPrimary MuiPaper-elevation0"
+          >
+            <div
+              class="MuiToolbar-root MuiToolbar-regular MuiToolbar-gutters"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-1 MuiGrid-align-items-xs-center"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-item"
+                >
+                  <button
+                    aria-label="open drawer"
+                    class="MuiButtonBase-root MuiIconButton-root makeStyles-menuButton-17 MuiIconButton-colorInherit"
+                    style="display: none;"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      class="MuiIconButton-label"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="MuiTouchRipple-root"
+                    />
+                  </button>
+                </div>
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true"
+                />
+              </div>
+            </div>
+          </header>
+          <div
+            class="MuiPaper-root MuiAppBar-root MuiAppBar-positionStatic MuiAppBar-colorPrimary makeStyles-secondaryBar-16 MuiPaper-elevation0"
+          >
+            <div
+              class="MuiToolbar-root MuiToolbar-regular MuiToolbar-gutters"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-1 MuiGrid-align-items-xs-center"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true"
+                >
+                  <h1
+                    class="MuiTypography-root MuiTypography-h5 MuiTypography-colorInherit"
+                  >
+                    Bike parking areas
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiPaper-root MuiAppBar-root MuiAppBar-positionStatic MuiAppBar-colorPrimary makeStyles-secondaryBar-16 MuiPaper-elevation0"
+          >
+            <div
+              class="MuiTabs-root"
+            >
+              <div
+                class="MuiTabs-scroller MuiTabs-fixed"
+                style="overflow: hidden;"
+              >
+                <div
+                  class="MuiTabs-flexContainer"
+                  role="tablist"
+                >
+                  <button
+                    aria-selected="true"
+                    class="MuiButtonBase-root MuiTab-root MuiTab-textColorInherit Mui-selected"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      class="MuiTab-wrapper"
+                    >
+                      Map
+                    </span>
+                  </button>
+                  <button
+                    aria-selected="false"
+                    class="MuiButtonBase-root MuiTab-root MuiTab-textColorInherit"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <span
+                      class="MuiTab-wrapper"
+                    >
+                      Point
+                    </span>
+                  </button>
+                </div>
+                <span
+                  class="PrivateTabIndicator-root-21 PrivateTabIndicator-colorSecondary-23 MuiTabs-indicator"
+                  style="left: 0px; width: 0px;"
+                />
+              </div>
+            </div>
+          </div>
+          <main
+            class="makeStyles-main-4"
+          >
+            <div />
+            <div
+              style="display: none;"
+            >
+              Lorem ipsum
+            </div>
+          </main>
+        </div>
+      </div>
+      <div
+        style="display: none; flex: 1; position: fixed; width: 100%; height: 100%;"
+      >
+        <div />
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="makeStyles-root-1"
+      style="display: flex;"
+    >
+      <nav
+        class="makeStyles-drawer-2"
+      >
+        <div
+          class="MuiDrawer-root MuiDrawer-docked"
+        >
+          <div
+            class="MuiPaper-root MuiDrawer-paper MuiDrawer-paperAnchorLeft MuiDrawer-paperAnchorDockedLeft MuiPaper-elevation0"
+            style="width: 256px;"
+          >
+            <ul
+              class="MuiList-root"
+            >
+              <li
+                class="MuiListItem-root makeStyles-firebase-11 makeStyles-item-9 makeStyles-itemCategory-10 MuiListItem-gutters"
+              >
+                Safebike
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-colorInherit"
+                  style="position: absolute; right: 0px;"
+                  tabindex="0"
+                  type="button"
+                >
+                  <span
+                    class="MuiButton-label"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="MuiTouchRipple-root"
+                  />
+                </button>
+              </li>
+              <li
+                class="MuiListItem-root makeStyles-categoryHeader-7 MuiListItem-gutters"
+              >
+                <div
+                  class="MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiListItemText-primary makeStyles-categoryHeaderPrimary-8 MuiTypography-body1 MuiTypography-displayBlock"
+                  >
+                    Admin
+                  </span>
+                </div>
+              </li>
+              <div
+                aria-disabled="false"
+                class="MuiButtonBase-root MuiListItem-root makeStyles-item-9 makeStyles-itemActiveItem-12 MuiListItem-gutters MuiListItem-button"
+                role="button"
+                tabindex="0"
+              >
+                <div
+                  class="MuiListItemIcon-root makeStyles-itemIcon-14"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6s-1.1.2-1.4.6L7.8 8.4c-.4.4-.6.9-.6 1.4 0 .6.2 1.1.6 1.4L11 14v5h2v-6.2l-2.2-2.3zM19 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"
+                    />
+                  </svg>
+                </div>
+                <div
+                  class="MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiListItemText-primary makeStyles-itemPrimary-13 MuiTypography-body1 MuiTypography-displayBlock"
+                  >
+                    App
+                  </span>
+                </div>
+                <span
+                  class="MuiTouchRipple-root"
+                />
+              </div>
+              <hr
+                class="MuiDivider-root makeStyles-divider-15"
+              />
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div
+        class="makeStyles-app-3"
+      >
+        <header
+          class="MuiPaper-root MuiAppBar-root MuiAppBar-positionSticky MuiAppBar-colorPrimary MuiPaper-elevation0"
+        >
+          <div
+            class="MuiToolbar-root MuiToolbar-regular MuiToolbar-gutters"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-1 MuiGrid-align-items-xs-center"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item"
+              >
+                <button
+                  aria-label="open drawer"
+                  class="MuiButtonBase-root MuiIconButton-root makeStyles-menuButton-17 MuiIconButton-colorInherit"
+                  style="display: none;"
+                  tabindex="0"
+                  type="button"
+                >
+                  <span
+                    class="MuiIconButton-label"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="MuiTouchRipple-root"
+                  />
+                </button>
+              </div>
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true"
+              />
+            </div>
+          </div>
+        </header>
+        <div
+          class="MuiPaper-root MuiAppBar-root MuiAppBar-positionStatic MuiAppBar-colorPrimary makeStyles-secondaryBar-16 MuiPaper-elevation0"
+        >
+          <div
+            class="MuiToolbar-root MuiToolbar-regular MuiToolbar-gutters"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-1 MuiGrid-align-items-xs-center"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true"
+              >
+                <h1
+                  class="MuiTypography-root MuiTypography-h5 MuiTypography-colorInherit"
+                >
+                  Bike parking areas
+                </h1>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiPaper-root MuiAppBar-root MuiAppBar-positionStatic MuiAppBar-colorPrimary makeStyles-secondaryBar-16 MuiPaper-elevation0"
+        >
+          <div
+            class="MuiTabs-root"
+          >
+            <div
+              class="MuiTabs-scroller MuiTabs-fixed"
+              style="overflow: hidden;"
+            >
+              <div
+                class="MuiTabs-flexContainer"
+                role="tablist"
+              >
+                <button
+                  aria-selected="true"
+                  class="MuiButtonBase-root MuiTab-root MuiTab-textColorInherit Mui-selected"
+                  role="tab"
+                  tabindex="0"
+                  type="button"
+                >
+                  <span
+                    class="MuiTab-wrapper"
+                  >
+                    Map
+                  </span>
+                </button>
+                <button
+                  aria-selected="false"
+                  class="MuiButtonBase-root MuiTab-root MuiTab-textColorInherit"
+                  role="tab"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="MuiTab-wrapper"
+                  >
+                    Point
+                  </span>
+                </button>
+              </div>
+              <span
+                class="PrivateTabIndicator-root-21 PrivateTabIndicator-colorSecondary-23 MuiTabs-indicator"
+                style="left: 0px; width: 0px;"
+              />
+            </div>
+          </div>
+        </div>
+        <main
+          class="makeStyles-main-4"
+        >
+          <div />
+          <div
+            style="display: none;"
+          >
+            Lorem ipsum
+          </div>
+        </main>
+      </div>
+    </div>
+    <div
+      style="display: none; flex: 1; position: fixed; width: 100%; height: 100%;"
+    >
+      <div />
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

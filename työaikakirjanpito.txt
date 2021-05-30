@@ -54,3 +54,4 @@ päivä		aika	kumul.	mitä tein
 			0:30	122:50	window resize, drawer button
 26.5.		0:20	123:10	window resize
 30.5.		0:30	123:40	map setup refactoring
+			1:00	124:40	initial test

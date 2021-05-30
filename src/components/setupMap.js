@@ -1,32 +1,21 @@
 import React, {
-  useRef, useEffect, useState,
+  useState,
 } from 'react';
 import ReactDOM from 'react-dom';
-  import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; // eslint-disable-line
 import {
-  Box,
   Button,
   TextField,
   Typography,
-  Fab,
-  AppBar,
-  CssBaseline,
-  Grid,
-  Paper,
-  IconButton,
-  InputBase,
   Menu,
   MenuItem,
 } from '@material-ui/core';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-import { makeStyles } from '@material-ui/core/styles';
-import clsx from 'clsx';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import defaultMapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import './mapbox-gl-draw.css';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import polylabel from '@mapbox/polylabel';
-import { Search as SearchIcon, Add as AddIcon } from '@material-ui/icons';
+import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; //eslint-disable-line
 
 const handleRightClick = ({ e, draw }) => {
   const divElement = document.createElement('div');
