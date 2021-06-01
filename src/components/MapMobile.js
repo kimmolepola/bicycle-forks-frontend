@@ -44,8 +44,6 @@ const Map = ({
   const [lat, setLat] = useState(60.1655);
   const [zoom, setZoom] = useState(13.76);
   const [currentPopup, setCurrentPopup] = useState(null);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchText, setSearchText] = useState('');
 
   const mapContainer = useRef();
 
@@ -92,35 +90,25 @@ const Map = ({
     });
   }, []);
 
-  const handleSearchSubmit = (e) => {
+  const handleFabClick = (e) => {
     e.preventDefault();
+    const elements = [...document.getElementsByClassName('mapboxgl-ctrl-top-right')];
+    for (let i = 0; i < elements.length; i += 1) {
+      if (elements[i].style.visibility === 'visible') {
+        elements[i].style.visibility = 'hidden';
+      } else {
+        elements[i].style.visibility = 'visible';
+      }
+    }
   };
 
   return (
     <div className={classes.app}>
       <Box className={classes.container}>
         <div className={clsx('map-container', classes.mapContainer)} style={{ display: '' }} ref={mapContainer} />
-        <Fab onClick={(x) => setSearchOpen(!searchOpen)} style={{ position: 'absolute', bottom: 50, right: 30 }} color="primary" aria-label="add">
+        <Fab onClick={handleFabClick} style={{ position: 'absolute', bottom: 50, right: 30 }} color="primary" aria-label="add">
           <AddIcon />
         </Fab>
-        <Paper style={{ display: 'flex', margin: 15, marginRight: 50 }}>
-          <Paper
-            onSubmit={handleSearchSubmit}
-            component="form"
-            style={{
-              background: 'white', display: searchOpen ? 'flex' : 'none', flex: 1, zIndex: 2,
-            }}
-          >
-            <InputBase
-              style={{ marginLeft: 10, flex: 1 }}
-              placeholder="Search (not implemented yet)"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-            <IconButton type="submit" className={classes.iconButton} aria-label="search">
-              <SearchIcon />
-            </IconButton>
-          </Paper>
-        </Paper>
       </Box>
     </div>
   );

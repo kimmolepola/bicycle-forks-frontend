@@ -198,6 +198,7 @@ const App = () => {
           />
           <main className={classes.main}>
             <Map
+              map={map}
               deleteFeature={deleteFeature}
               handleSnackbarMessage={handleSnackbarMessage}
               editFeature={editFeature}
@@ -223,6 +224,7 @@ const App = () => {
       >
         <CssBaseline />
         <MapMobile
+          map={mapMobile}
           getFeatures={getFeatures}
           setMapMobile={setMapMobile}
           setDrawMobile={setDrawMobile}

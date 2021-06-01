@@ -16,6 +16,9 @@ import './mapbox-gl-draw.css';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import polylabel from '@mapbox/polylabel';
 import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker'; //eslint-disable-line
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import './mapbox-gl-geocoder.css';
 
 const handleRightClick = ({ e, draw }) => {
   const divElement = document.createElement('div');
@@ -256,6 +259,15 @@ const setupMap = ({
   });
 
   map.on('load', () => {
+    map.addControl(new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl,
+      collapsed: true,
+      placeholder: 'Search (not completely implemented yet )',
+      clearAndBlurOnEsc: true,
+      clearOnBlur: true,
+      countries: 'FI',
+    }));
     map.addControl(draw);
     if (controls.navigation) {
       map.addControl(new mapboxgl.NavigationControl());
