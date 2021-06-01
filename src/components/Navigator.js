@@ -85,7 +85,7 @@ const Navigator = ({
       <List disablePadding>
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
           Safebike
-          <Button color="inherit" style={{ position: 'absolute', right: 0 }} onClick={() => setDrawerOpen(false)}>
+          <Button id="drawerCloseButton" color="inherit" style={{ position: 'absolute', right: 0 }} onClick={() => setDrawerOpen(false)}>
             <CloseIcon />
           </Button>
         </ListItem>

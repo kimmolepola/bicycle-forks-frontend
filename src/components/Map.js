@@ -108,7 +108,7 @@ const Map = ({
   };
 
   return (
-    <Box style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
+    <Box id="mapTabContent" style={{ display: tab === 0 ? '' : 'none' }} className={classes.container}>
       <div
         className={classes.sidebar}
         style={searchOpen ? { marginLeft: 12, marginTop: 66 } : { margin: 12 }}

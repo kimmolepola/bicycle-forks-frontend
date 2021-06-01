@@ -42,6 +42,7 @@ const Header = ({
           <Grid container spacing={1} alignItems="center">
             <Grid item>
               <IconButton
+                id="drawerOpenButton"
                 style={{ display: drawerOpen ? 'none' : '' }}
                 color="inherit"
                 aria-label="open drawer"
@@ -80,8 +81,8 @@ const Header = ({
         elevation={0}
       >
         <Tabs value={tab} textColor="inherit">
-          <Tab onClick={() => setTab(0)} textColor="inherit" label="Map" />
-          <Tab onClick={() => setTab(1)} textColor="inherit" label="Point" />
+          <Tab id="mapTab" onClick={() => setTab(0)} textColor="inherit" label="Map" />
+          <Tab id="pointTab" onClick={() => setTab(1)} textColor="inherit" label="Point" />
         </Tabs>
       </AppBar>
     </>

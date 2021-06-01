@@ -180,7 +180,7 @@ const App = () => {
             {snackbarMessage.message}
           </Alert>
         </Snackbar>
-        <nav style={{ display: drawerOpen ? '' : 'none' }} className={classes.drawer}>
+        <nav id="drawer" style={{ display: drawerOpen ? '' : 'none' }} className={classes.drawer}>
           <Navigator
             PaperProps={{ style: { width: drawerWidth } }}
             navigation={navigation}
@@ -207,13 +207,19 @@ const App = () => {
               setMap={setMap}
               tab={tab}
             />
-            <div style={{ display: tab === 1 ? 'flex' : 'none' }}>Lorem ipsum</div>
+            <div id="pointTabContent" style={{ display: tab === 1 ? 'flex' : 'none' }}>Lorem ipsum</div>
           </main>
         </div>
       </div>
-      <div style={{
-        display: isMobile ? 'flex' : 'none', flex: 1, position: 'fixed', width: '100%', height: '100%',
-      }}
+      <div
+        id="mobileMap"
+        style={{
+          display: isMobile ? 'flex' : 'none',
+          flex: 1,
+          position: 'fixed',
+          width: '100%',
+          height: '100%',
+        }}
       >
         <CssBaseline />
         <MapMobile
