@@ -263,7 +263,7 @@ const setupMap = ({
       accessToken: mapboxgl.accessToken,
       mapboxgl,
       collapsed: true,
-      placeholder: 'Search (not completely implemented yet )',
+      placeholder: 'Search (not fully implemented yet )',
       clearAndBlurOnEsc: true,
       clearOnBlur: true,
       countries: 'FI',
